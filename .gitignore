@@ -38,3 +38,6 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Configuración local ###
+src/main/resources/application-local.properties
