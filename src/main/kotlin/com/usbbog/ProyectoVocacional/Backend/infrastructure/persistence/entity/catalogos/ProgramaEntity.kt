@@ -4,8 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(
-    name = "programa",
-    schema = "catalogos"
+    name = "programa"
 )
 class ProgramaEntity(
 
@@ -14,12 +13,7 @@ class ProgramaEntity(
     @Column(name = "id")
     var id: Long? = null,
 
-    @Column(
-        name = "nombre",
-        nullable = false,
-        unique = true,
-        length = 150
-    )
+    @Column(name = "nombre", nullable = false, unique = true, length = 150)
     var nombrePrograma: String,
 
     @Column(name = "descripcion")
@@ -28,17 +22,10 @@ class ProgramaEntity(
     @Column(name = "url")
     var url: String? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "id_area",
-        nullable = false
-    )
-    var area: AreaEntity,
+    @Column(name="id_area", nullable = false)
+    var idArea:Long,
 
-    @Column(
-    name = "activo",
-    nullable = false
-    )
+    @Column(name = "estado", nullable = false)
     var activo: Boolean = true
 
 )

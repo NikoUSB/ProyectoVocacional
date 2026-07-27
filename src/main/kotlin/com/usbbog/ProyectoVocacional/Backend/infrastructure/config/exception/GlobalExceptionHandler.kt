@@ -1,12 +1,15 @@
 package com.usbbog.proyectovocacional.backend.infrastructure.config.exception
 
+//import org.springframework.security.access.AccessDeniedException
+//import org.springframework.security.core.AuthenticationException
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-//import org.springframework.security.access.AccessDeniedException
-//import org.springframework.security.core.AuthenticationException
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -38,40 +41,40 @@ class GlobalExceptionHandler {
     }
 
     // 401
-//    @ExceptionHandler(AuthenticationException::class)
-//    fun handleUnauthorized(
-//        ex: AuthenticationException,
-//        request: HttpServletRequest
-//    ): ResponseEntity<ErrorResponse> {
-//
-//        val response = ErrorResponse(
-//            LocalDateTime.now(),
-//            401,
-//            "UNAUTHORIZED",
-//            "Credenciales inválidas.",
-//            request.requestURI
-//        )
-//
-//        return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
-//    }
+    @ExceptionHandler(AuthenticationException::class)
+    fun handleUnauthorized(
+        ex: AuthenticationException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+
+        val response = ErrorResponse(
+            LocalDateTime.now(),
+            401,
+            "UNAUTHORIZED",
+            "Credenciales inválidas.",
+            request.requestURI
+        )
+
+        return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
+    }
 
     // 403
-//    @ExceptionHandler(AccessDeniedException::class)
-//    fun handleForbidden(
-//        ex: AccessDeniedException,
-//        request: HttpServletRequest
-//    ): ResponseEntity<ErrorResponse> {
-//
-//        val response = ErrorResponse(
-//            LocalDateTime.now(),
-//            403,
-//            "FORBIDDEN",
-//            "No tiene permisos para acceder a este recurso.",
-//            request.requestURI
-//        )
-//
-//        return ResponseEntity(response, HttpStatus.FORBIDDEN)
-//    }
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleForbidden(
+        ex: AccessDeniedException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+
+        val response = ErrorResponse(
+            LocalDateTime.now(),
+            403,
+            "FORBIDDEN",
+            "No tiene permisos para acceder a este recurso.",
+            request.requestURI
+        )
+
+        return ResponseEntity(response, HttpStatus.FORBIDDEN)
+    }
 
     // 404, 400, 409, etc. (ResponseStatusException)
     @ExceptionHandler(ResponseStatusException::class)
@@ -107,6 +110,24 @@ class GlobalExceptionHandler {
         )
 
         return ResponseEntity(response, HttpStatus.CONFLICT)
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadable(
+        ex: HttpMessageNotReadableException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+
+        return ResponseEntity(
+            ErrorResponse(
+                timestamp = LocalDateTime.now(),
+                status = HttpStatus.BAD_REQUEST.value(),
+                error = "Bad Request",
+                message = "El cuerpo de la petición es inválido o faltan campos obligatorios.",
+                path = request.requestURI
+            ),
+            HttpStatus.BAD_REQUEST
+        )
     }
 
     // 500

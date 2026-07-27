@@ -5,7 +5,6 @@ import jakarta.persistence.*
 @Entity
 @Table(
     name = "area",
-    schema = "catalogos"
 )
 class AreaEntity (
     @Id
@@ -13,23 +12,13 @@ class AreaEntity (
     @Column(name = "id")
     var id: Long? = null,
 
-    @Column(
-        name = "nombre",
-        nullable = false,
-        length = 150,
-        unique = true
-    )
+    @Column(name = "nombre", nullable = false, length = 150, unique = true)
     var nombreArea: String,
 
-    @Column(
-        name = "descripcion_area"
-    )
+    @Column(name = "descripcion_area")
     var descripcionArea: String,
 
-    @Column(
-    name = "activo",
-    nullable = false
-    )
+    @Column(name = "estado", nullable = false)
     var activo: Boolean = true
 
 )

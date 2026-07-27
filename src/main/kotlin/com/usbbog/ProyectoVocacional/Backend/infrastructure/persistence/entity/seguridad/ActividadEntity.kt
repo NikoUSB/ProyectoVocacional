@@ -4,8 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(
-    name = "actividad",
-    schema = "seguridad"
+    name = "actividad"
 )
 class ActividadEntity(
 
@@ -14,20 +13,13 @@ class ActividadEntity(
     @Column(name = "id")
     var id: Long? = null,
 
-    @Column(
-        name = "nombre_act",
-        nullable = false,
-        unique = true,
-        length = 150
-    )
+    @Column(name = "nombre_act", nullable = false, unique = true, length = 150)
     var nombreActividad: String,
 
     @Column(name = "url")
     var url: String? = null,
 
-    @Column(
-        name = "estado",
-        nullable = false
-    )
+    @Column(name = "estado", nullable = false)
     var activo: Boolean = true
+
 )

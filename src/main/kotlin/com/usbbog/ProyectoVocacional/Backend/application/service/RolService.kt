@@ -34,7 +34,7 @@ class RolService(
 
         if (!rol.activo) {
             throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 "El rol se encuentra inactivo."
             )
         }

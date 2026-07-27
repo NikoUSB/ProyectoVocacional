@@ -1,12 +1,10 @@
 package com.usbbog.proyectovocacional.backend.infrastructure.persistence.entity.evaluacion
 
-import com.usbbog.proyectovocacional.backend.infrastructure.persistence.entity.catalogos.ProgramaEntity
 import jakarta.persistence.*
 
 @Entity
 @Table(
-    name = "pregunta",
-    schema = "evaluacion"
+    name = "pregunta"
 )
 class PreguntaEntity(
 
@@ -15,22 +13,13 @@ class PreguntaEntity(
     @Column(name = "id")
     var id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "id_programa",
-        nullable = false
-    )
-    var programa: ProgramaEntity,
+    @Column(name = "id_programa", nullable = false)
+    var idPrograma: Long,
 
-    @Column(
-        name = "enunciado",
-        nullable = false
-    )
+    @Column(name = "enunciado", nullable = false)
     var enunciado: String,
 
-    @Column(
-        name = "activa",
-        nullable = false
-    )
-    var activa: Boolean = true
+    @Column(name = "estado", nullable = false)
+    var activo: Boolean = true
+
 )

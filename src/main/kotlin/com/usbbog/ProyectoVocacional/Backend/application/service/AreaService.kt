@@ -35,7 +35,7 @@ class AreaService (
 
         if (!area.activo) {
             throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 "El área se encuentra inactiva."
             )
         }

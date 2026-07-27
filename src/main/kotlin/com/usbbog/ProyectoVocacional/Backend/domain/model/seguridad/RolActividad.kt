@@ -1,7 +1,8 @@
 package com.usbbog.proyectovocacional.backend.domain.model.seguridad
 
-data class Rol(
+data class RolActividad (
     val id: Long?,
-    val nombreRol: String,
+    val idRol: Long,
+    val idActividad: Long,
     val activo: Boolean
 )

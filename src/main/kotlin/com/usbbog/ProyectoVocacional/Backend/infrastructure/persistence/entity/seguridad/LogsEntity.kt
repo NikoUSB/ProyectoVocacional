@@ -5,8 +5,7 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(
-    name = "logs",
-    schema = "seguridad"
+    name = "logs"
 )
 class LogsEntity(
 
@@ -15,26 +14,19 @@ class LogsEntity(
     @Column(name = "id")
     var id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "id_usuario_alterado",
-        nullable = false
-    )
-    var usuario: UsuarioEntity,
+    @Column(name = "id_usuario_alterado", nullable = false)
+    var idUsuarioAlterado: Long,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "id_actividad",
-        nullable = false
-    )
-    var actividad: ActividadEntity,
+    @Column(name = "id_actividad", nullable = false)
+    var idActividad: Long,
 
     @Column(name = "descripcion")
     var descripcion: String? = null,
 
-    @Column(
-        name = "fecha",
-        nullable = false
-    )
-    var fecha: LocalDateTime = LocalDateTime.now()
+    @Column(name = "fecha", nullable = false)
+    var fecha: LocalDateTime = LocalDateTime.now(),
+
+    @Column(name = "estado", nullable = false)
+    var activo: Boolean = true
+
 )

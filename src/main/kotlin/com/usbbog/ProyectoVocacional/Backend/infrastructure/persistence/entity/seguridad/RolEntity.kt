@@ -4,8 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(
-    name = "rol",
-    schema = "seguridad"
+    name = "rol"
 )
 class RolEntity(
 
@@ -14,18 +13,10 @@ class RolEntity(
     @Column(name = "id")
     var id: Long? = null,
 
-    @Column(
-        name = "nombre_rol",
-        nullable = false,
-        length = 100,
-        unique = true
-    )
+    @Column(name = "nombre_rol", nullable = false, length = 100, unique = true)
     var nombreRol: String,
 
-    @Column(
-        name = "activo",
-        nullable = false
-    )
+    @Column(name = "estado", nullable = false)
     var activo: Boolean = true
 
 )

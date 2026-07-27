@@ -4,13 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(
-    name = "rol_actividad",
-    schema = "seguridad",
-    uniqueConstraints = [
-        UniqueConstraint(
-            columnNames = ["id_rol", "id_actividad"]
-        )
-    ]
+    name = "rol_actividad"
 )
 class RolActividadEntity(
 
@@ -19,23 +13,13 @@ class RolActividadEntity(
     @Column(name = "id")
     var id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "id_rol",
-        nullable = false
-    )
-    var rol: RolEntity,
+    @Column(name = "id_rol", nullable = false)
+    var idRol: Long,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "id_actividad",
-        nullable = false
-    )
-    var actividad: ActividadEntity,
+    @Column(name = "id_actividad", nullable = false)
+    var idActividad: Long,
 
-    @Column(
-        name = "estado",
-        nullable = false
-    )
+    @Column(name = "estado", nullable = false)
     var activo: Boolean = true
+
 )
