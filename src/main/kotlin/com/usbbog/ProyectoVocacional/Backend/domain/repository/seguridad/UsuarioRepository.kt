@@ -1,6 +1,7 @@
 package com.usbbog.proyectovocacional.backend.domain.repository.seguridad
 
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.Usuario
+import com.usbbog.proyectovocacional.backend.domain.model.seguridad.UsuarioLogin
 
 interface UsuarioRepository{
 
@@ -44,4 +45,9 @@ interface UsuarioRepository{
         id:Long
     )
 
+    fun obtenerUsuarioConRol(
+        value: String
+    ): UsuarioLogin?
+
 }
+

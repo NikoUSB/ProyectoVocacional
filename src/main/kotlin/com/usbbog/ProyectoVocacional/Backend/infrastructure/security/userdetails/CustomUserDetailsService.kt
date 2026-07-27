@@ -25,42 +25,17 @@ class CustomUserDetailsService(
     ): UserDetails {
 
 
-        val usuario =
-
-            usuarioRepository
-                .obtenerPorNombreUsuario(
-                    username
-                )
-
-                ?: throw UsernameNotFoundException(
-
-                    "Usuario no encontrado."
-
-                )
-
-
-        val rol =
-
-            rolRepository
-                .obtenerPorId(
-                    usuario.idRol
-                )
-
-                ?: throw UsernameNotFoundException(
-
-                    "Rol no encontrado."
-
-                )
+        val usuario = usuarioRepository.obtenerPorNombreUsuario(username)
+                ?: throw UsernameNotFoundException("Usuario no encontrado.")
+        val rol = rolRepository.obtenerPorId(usuario.idRol)
+                ?: throw UsernameNotFoundException("Rol no encontrado.")
 
 
         return CustomUserDetails(
 
             usuario.nombreUsuario!!,
-
             usuario.contrasenaHash,
-
             rol.nombreRol,
-
             usuario.activo
 
         )

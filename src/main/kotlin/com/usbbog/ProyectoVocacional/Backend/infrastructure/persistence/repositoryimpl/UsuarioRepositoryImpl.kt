@@ -1,12 +1,11 @@
 package com.usbbog.proyectovocacional.backend.infrastructure.persistence.repositoryimpl
 
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.Usuario
+import com.usbbog.proyectovocacional.backend.domain.model.seguridad.UsuarioLogin
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.UsuarioRepository
-import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.seguridad.RolMapper
-import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.seguridad.RolMapper.toDomain
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.seguridad.UsuarioMapper
-import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.seguridad.UsuarioMapper.toDomain
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.repository.UsuarioJpaRepository
+import com.usbbog.proyectovocacional.backend.infrastructure.persistence.projection.UsuarioLoginProjection
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -78,6 +77,7 @@ class UsuarioRepositoryImpl(
 
     }
 
+
     override fun guardar(usuario: Usuario): Usuario {
         val entity = UsuarioMapper.toEntity(usuario)
 
@@ -102,6 +102,34 @@ class UsuarioRepositoryImpl(
         entity.activo = true
 
         jpaRepository.save(entity)
+    }
+
+    override fun obtenerUsuarioConRol(
+
+        value: String
+
+    ): UsuarioLogin? {
+
+        return jpaRepository
+            .obtenerUsuarioConRol(value)
+            ?.let {
+
+                UsuarioLogin(
+
+                    id = it.id,
+
+                    nombreUsuario = it.nombreUsuario,
+
+                    contrasenaHash = it.contrasenaHash,
+
+                    rol = it.nombreRol,
+
+                    activo = it.estado
+
+                )
+
+            }
+
     }
 
 }

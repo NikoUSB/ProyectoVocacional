@@ -38,19 +38,16 @@ class AuthService(
 
     ): LoginResponse {
 
+
         val usuario =
 
             usuarioRepository
-                .obtenerPorNombreUsuario(
-                    request.username
-                )
+
+                .obtenerUsuarioConRol(request.username)
 
                 ?: throw ResponseStatusException(
-
                     HttpStatus.UNAUTHORIZED,
-
                     "Credenciales inválidas."
-
                 )
 
         val match = passwordService.matches(
@@ -85,31 +82,13 @@ class AuthService(
         }
 
 
-        val rol =
-
-            rolRepository
-
-                .obtenerPorId(
-
-                    usuario.idRol
-
-                )
-
-                ?: throw ResponseStatusException(
-                    HttpStatus.CONFLICT,
-
-                    "El rol no existe."
-
-                )
-
-
         val token =
 
             jwtService.generateToken(
 
                 usuario.nombreUsuario!!,
 
-                rol.nombreRol
+                usuario.rol
 
             )
 
@@ -122,7 +101,7 @@ class AuthService(
 
             username = usuario.nombreUsuario,
 
-            rol = rol.nombreRol
+            rol = usuario.rol
 
         )
 
