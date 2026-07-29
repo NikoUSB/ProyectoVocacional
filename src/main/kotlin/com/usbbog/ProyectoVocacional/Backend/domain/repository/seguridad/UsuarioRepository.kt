@@ -8,46 +8,23 @@ interface UsuarioRepository{
 
     fun obtenerTodos():List<Usuario>
 
+    fun obtenerPorId(id:Long):Usuario?
 
-    fun obtenerPorId(
-        id:Long
-    ):Usuario?
+    fun obtenerPorCorreo(correo:String):Usuario?
 
+    fun obtenerPorDocumento(documento:String):Usuario?
 
-    fun obtenerPorCorreo(
-        correo:String
-    ):Usuario?
+    fun obtenerPorNombreUsuario(nombreUsuario:String):Usuario?
 
+    fun obtenerPorCorreoONombreUsuario(value:String):Usuario?
 
-    fun obtenerPorDocumento(
-        documento:String
-    ):Usuario?
+    fun guardar(usuario:Usuario):Usuario
 
+    fun desactivar(id:Long)
 
-    fun obtenerPorNombreUsuario(
-        nombreUsuario:String
-    ):Usuario?
+    fun reactivar(id:Long    )
 
-    fun obtenerPorCorreoONombreUsuario(
-        value:String
-    ):Usuario?
-
-    fun guardar(
-        usuario:Usuario
-    ):Usuario
-
-
-    fun desactivar(
-        id:Long
-    )
-
-    fun reactivar(
-        id:Long
-    )
-
-    fun obtenerUsuarioConRol(
-        value: String
-    ): UsuarioLogin?
+    fun obtenerUsuarioConRol(value: String): UsuarioLogin?
 
 }
 

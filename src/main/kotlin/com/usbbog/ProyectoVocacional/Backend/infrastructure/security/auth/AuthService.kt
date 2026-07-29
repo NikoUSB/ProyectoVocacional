@@ -6,6 +6,7 @@ import com.usbbog.proyectovocacional.backend.infrastructure.security.jwt.JwtServ
 import com.usbbog.proyectovocacional.backend.infrastructure.security.password.PasswordService
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.UsuarioRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.RolRepository
+import com.usbbog.proyectovocacional.backend.infrastructure.security.jwt.JwtProperties
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -20,7 +21,9 @@ class AuthService(
 
     private val passwordService: PasswordService,
 
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+
+    private val jwtProperties: JwtProperties
 
 ) {
 
@@ -97,7 +100,7 @@ class AuthService(
 
             token = token,
 
-            expiresIn = 900,
+            expiresIn = jwtProperties.expiration / 1000,
 
             username = usuario.nombreUsuario,
 

@@ -57,5 +57,8 @@ class CustomUserDetails(
 
     override fun isCredentialsNonExpired() = true
 
+    fun getRol():String{
+        return rol
+    }
 
 }

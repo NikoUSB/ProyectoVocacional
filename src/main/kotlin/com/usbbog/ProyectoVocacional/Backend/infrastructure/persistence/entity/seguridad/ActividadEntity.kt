@@ -16,8 +16,14 @@ class ActividadEntity(
     @Column(name = "nombre_act", nullable = false, unique = true, length = 150)
     var nombreActividad: String,
 
+    @Column(name = "metodo_http", length = 10)
+    var metodoHttp: String,
+
     @Column(name = "url")
     var url: String? = null,
+
+    @Column(name = "visible", nullable = false)
+    var visible: Boolean = false,
 
     @Column(name = "estado", nullable = false)
     var activo: Boolean = true

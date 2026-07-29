@@ -1,6 +1,6 @@
-package com.usbbog.proyectovocacional.backend.domain.model.seguridad
+package com.usbbog.proyectovocacional.backend.application.dto.response
 
-data class Actividad (
+data class ActividadResponse (
     val id: Long?,
     val nombreActividad: String,
     val metodoHttp: String,

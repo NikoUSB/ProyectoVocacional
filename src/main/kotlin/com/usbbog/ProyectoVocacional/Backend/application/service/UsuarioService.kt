@@ -47,12 +47,9 @@ class UsuarioService(
     }
 
 
-    fun obtenerPorId(
-        id:Long
-    ):Usuario{
+    fun obtenerPorId(id:Long):Usuario{
 
-
-        return repository.obtenerPorId(id)
+        val usuario = repository.obtenerPorId(id)
 
             ?: throw ResponseStatusException(
 
@@ -62,6 +59,14 @@ class UsuarioService(
 
             )
 
+        if (!usuario.activo){
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Usuario inactivo."
+            )
+        }
+
+        return usuario
 
     }
 

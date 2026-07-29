@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class AreaService (
-    private val repository: AreaRepository
-) {
+class AreaService (private val repository: AreaRepository) {
     fun obtenerTodos(): List<Area> {
 
         val areas = repository.obtenerTodos()
