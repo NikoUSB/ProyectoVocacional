@@ -76,7 +76,7 @@ class ActividadService (
 //                    HttpStatus.NOT_FOUND,
 //                    "No se encontró la actividad con id ${rolActividad.idActividad}."
 //                )
-            if (actividad != null){
+            if (actividad != null && actividad.visible == true) {
                 actividades.add(actividad)
             }
 

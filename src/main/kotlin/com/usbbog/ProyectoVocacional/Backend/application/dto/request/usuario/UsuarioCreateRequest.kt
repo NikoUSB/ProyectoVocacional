@@ -5,11 +5,6 @@ import java.time.LocalDate
 
 data class UsuarioCreateRequest(
 
-    @field:NotNull(
-        message = "El rol es obligatorio."
-    )
-    val idRol: Long,
-
     val idPrograma: Long? = null,
 
 
@@ -67,7 +62,7 @@ data class UsuarioCreateRequest(
 
     val departamento: String?,
 
-    val ciudad: String?,
+    val municipio: String?,
 
     val semestre: Int?,
 

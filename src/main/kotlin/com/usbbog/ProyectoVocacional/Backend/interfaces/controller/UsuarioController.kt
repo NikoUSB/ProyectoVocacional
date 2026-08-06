@@ -1,7 +1,7 @@
 package com.usbbog.proyectovocacional.backend.interfaces.controller
 
-import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioCreateRequest
-import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioUpdateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioRolUpdateRequest
 import com.usbbog.proyectovocacional.backend.application.dto.response.UsuarioResponse
 import com.usbbog.proyectovocacional.backend.application.mapper.UsuarioDtoMapper
 import com.usbbog.proyectovocacional.backend.application.service.UsuarioService
@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -55,65 +56,18 @@ class UsuarioController(
 
     }
 
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(
-        summary = "Crear un nuevo usuario."
+        summary = "Actualizar datos del usuario."
     )
-    fun crear(
-
-        @Valid
-        @RequestBody
-        request: UsuarioCreateRequest
-
+    @PutMapping("/me/perfil")
+    fun actualizarPerfil(
+        @PathVariable id: Long,
+        @Valid @RequestBody request: UsuarioPerfilUpdateRequest
     ): UsuarioResponse {
 
         return UsuarioDtoMapper.toResponse(
-
-            service.guardar(
-
-                UsuarioDtoMapper.toDomain(
-                    request
-                )
-
-            )
-
+            service.actualizarPerfil(id, request)
         )
-
-    }
-
-
-    @PutMapping("/{id}")
-    @Operation(
-        summary = "Actualizar un usuario existente."
-    )
-    fun actualizar(
-
-        @PathVariable
-        id: Long,
-
-        @Valid
-        @RequestBody
-        request: UsuarioUpdateRequest
-
-    ): UsuarioResponse {
-
-        return UsuarioDtoMapper.toResponse(
-
-            service.guardar(
-
-                UsuarioDtoMapper.toDomain(
-
-                    id,
-                    request
-
-                )
-
-            )
-
-        )
-
     }
 
 
@@ -147,6 +101,21 @@ class UsuarioController(
 
         service.reactivar(id)
 
+    }
+
+    @PreAuthorize("hasRole('ROOT')")
+    @PatchMapping("/{id}/rol")
+    @Operation(
+        summary = "Actualizar rol de un usuario."
+    )
+    fun actualizarRol(
+        @PathVariable
+        id: Long,
+        @Valid
+        @RequestBody
+        request: UsuarioRolUpdateRequest
+    ): UsuarioResponse {
+        return UsuarioDtoMapper.toResponse( service.actualizarRol( id, request.idRol ) )
     }
 
 

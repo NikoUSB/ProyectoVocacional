@@ -1,11 +1,13 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
+import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.Usuario
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.ProgramaRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.RolRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.UsuarioRepository
 import com.usbbog.proyectovocacional.backend.infrastructure.security.password.PasswordService
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDateTime
@@ -23,6 +25,96 @@ class UsuarioService(
 
 ) {
 
+    private fun obtenerUsuarioAutenticado(): Usuario {
+
+        val authentication =
+            SecurityContextHolder
+                .getContext()
+                .authentication
+                ?: throw ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "No hay un usuario autenticado."
+                )
+
+        val username = authentication.name
+
+        return repository.obtenerPorNombreUsuario(username)
+            ?: throw ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Usuario autenticado no encontrado."
+            )
+    }
+
+    fun actualizarPerfil(id: Long, request: UsuarioPerfilUpdateRequest): Usuario {
+
+        val usuario = obtenerUsuarioAutenticado()
+
+        if (usuario.id != id) {
+
+            throw ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "No puede modificar el perfil de otro usuario."
+            )
+
+        }
+
+        if (!usuario.activo) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Usuario inactivo."
+            )
+        }
+
+        validarPrograma(request.idPrograma)
+
+        val actualizado = usuario.copy(
+
+            idPrograma = request.idPrograma,
+
+            nombre = request.nombre,
+            apellidos = request.apellidos,
+
+            telefono = request.telefono,
+
+            genero = request.genero,
+            generoOtro = request.generoOtro,
+
+            departamento = request.departamento,
+            ciudad = request.municipio,
+
+            semestre = request.semestre
+
+        )
+
+        return repository.guardar(actualizado)
+    }
+
+    fun actualizarRol(
+        id: Long,
+        idRol: Long
+    ): Usuario {
+
+        val usuario = repository.obtenerPorId(id)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Usuario no encontrado."
+            )
+
+        if (!usuario.activo) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No se puede modificar el rol de un usuario inactivo."
+            )
+        }
+
+        validarRol(idRol)
+
+        return repository.guardar(
+            usuario.copy(
+                idRol = idRol
+            )
+        )
+    }
 
     fun obtenerTodos():List<Usuario>{
 
@@ -75,33 +167,8 @@ class UsuarioService(
         usuario:Usuario
     ):Usuario{
 
-        /*UPDATE*/
-        if(usuario.id != null){
-            val usuarioActual =
-                repository.obtenerPorId(usuario.id)
-                    ?: throw ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Usuario no encontrado."
-                    )
-
-
-            return repository.guardar(
-                usuario.copy(
-                    activo = true,
-                    fechaCreacion = LocalDateTime.now()
-                )
-
-            )
-        }
-
-
-
-        /*
-            CREATE
-         */
-
-        validarRol(usuario)
-        validarPrograma(usuario)
+        validarRol(usuario.idRol)
+        validarPrograma(usuario.idPrograma)
         validarDocumento(usuario)
         validarCorreo(usuario)
         validarNombreUsuario(usuario)
@@ -158,9 +225,15 @@ class UsuarioService(
 
     ){
 
-        val usuario =
+        val usuario = repository.obtenerPorId(id)
 
-            obtenerPorId(id)
+            ?: throw ResponseStatusException(
+
+                HttpStatus.NOT_FOUND,
+
+                "Usuario con id $id no encontrado."
+
+            )
 
 
         if(usuario.activo){
@@ -184,51 +257,29 @@ class UsuarioService(
 
 
     private fun validarRol(
-        usuario:Usuario
-    ){
+        idRol: Long
+    ) {
 
-        rolRepository.obtenerPorId(
-            usuario.idRol
-        )
-
+        rolRepository.obtenerPorId(idRol)
             ?: throw ResponseStatusException(
-
                 HttpStatus.NOT_FOUND,
-
                 "El rol seleccionado no existe."
-
             )
-
     }
 
-
-
     private fun validarPrograma(
-        usuario:Usuario
-    ){
+        idPrograma: Long?
+    ) {
 
-        if(usuario.idPrograma == null){
-
+        if (idPrograma == null) {
             return
-
         }
 
-
-        programaRepository.obtenerPorId(
-
-            usuario.idPrograma
-
-        )
-
+        programaRepository.obtenerPorId(idPrograma)
             ?: throw ResponseStatusException(
-
                 HttpStatus.NOT_FOUND,
-
                 "El programa seleccionado no existe."
-
             )
-
-
     }
 
 
@@ -297,31 +348,20 @@ class UsuarioService(
     }
 
 
-    private fun validarNombreUsuario(
-        usuario:Usuario
-    ){
+    private fun validarNombreUsuario(usuario: Usuario) {
 
-        if(
-
-            repository.obtenerPorNombreUsuario(
-
-                usuario.nombreUsuario!!
-
-            ) != null
-
-        ){
-
-            throw ResponseStatusException(
-
+        val nombreUsuario = usuario.nombreUsuario
+            ?: throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-
-                "El nombre de usuario ya existe."
-
+                "El nombre de usuario es obligatorio."
             )
 
+        if (repository.obtenerPorNombreUsuario(nombreUsuario) != null) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El nombre de usuario ya existe."
+            )
         }
-
-
     }
 
 }

@@ -7,6 +7,6 @@ interface ProgramaJpaRepository : JpaRepository<ProgramaEntity, Long> {
 
     fun findByActivoTrue(): List<ProgramaEntity>
 
-    fun existsByNombreProgramaIgnoreCase(nombreRol: String): Boolean
+    fun findByIdAreaAndActivoTrue(idArea: Long): List<ProgramaEntity>
 
 }

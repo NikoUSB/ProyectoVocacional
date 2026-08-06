@@ -29,6 +29,26 @@ class  RolActividadRepositoryImpl (
         return rolActividades
     }
 
+    override fun obtenerTodasPorRol(idRol: Long): List<RolActividad> {
+        return  jpaRepository.findByIdRol(idRol)
+            .map(RolActividadMapper::toDomain)
+    }
+
+    override fun obtenerPorRolYActividad(idRol: Long, idActividad: Long): RolActividad? {
+        return jpaRepository.findByIdRolAndIdActividad(idRol, idActividad)
+            ?.let(RolActividadMapper::toDomain)
+    }
+
+
+    override fun guardar(rolActividad: RolActividad): RolActividad {
+
+        val entity = RolActividadMapper.toEntity(rolActividad)
+
+        return RolActividadMapper.toDomain(
+            jpaRepository.save(entity)
+        )
+    }
+
     override fun desactivar(id: Long) {
         val entity = jpaRepository.findById(id)
             .orElseThrow()

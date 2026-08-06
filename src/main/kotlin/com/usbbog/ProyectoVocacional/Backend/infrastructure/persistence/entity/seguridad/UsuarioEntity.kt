@@ -48,11 +48,11 @@ class UsuarioEntity(
     @Column(name = "genero_otro", length = 100)
     var generoOtro: String? = null,
 
-    @Column(name = "departamento", length = 100)
+    @Column(name = "id_departamento", length = 100)
     var departamento: String? = null,
 
-    @Column(name = "ciudad", length = 100)
-    var ciudad: String? = null,
+    @Column(name = "id_municipio", length = 100)
+    var municipio: String? = null,
 
     @Column(name="id_programa")
     var idPrograma:Long?,

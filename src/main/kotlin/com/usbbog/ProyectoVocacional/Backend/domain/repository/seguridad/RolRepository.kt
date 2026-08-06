@@ -12,5 +12,7 @@ interface RolRepository {
 
     fun eliminar(id: Long)
 
+    fun reactivar(id: Long)
+
     fun existePorNombre(nombre: String): Boolean
 }

@@ -13,7 +13,8 @@ object ProgramaMapper {
             descripcionPrograma = entity.descripcion,
             urlPrograma = entity.url,
             idArea = entity.idArea,
-            activo = entity.activo
+            activo = entity.activo,
+            pathLogo = entity.pathLogo
         )
 
     }
@@ -26,8 +27,8 @@ object ProgramaMapper {
             descripcion = domain.descripcionPrograma,
             url = domain.urlPrograma,
             idArea = domain.idArea,
-            activo = domain.activo
-
+            activo = domain.activo,
+            pathLogo = domain.pathLogo
         )
 
     }

@@ -30,8 +30,8 @@ class JwtFilter(
 
     ) {
 
-        println("JWT FILTER EJECUTADO")
-        println("AUTH HEADER: ${request.getHeader("Authorization")}")
+//        println("JWT FILTER EJECUTADO")
+//        println("AUTH HEADER: ${request.getHeader("Authorization")}")
 
 
         val authHeader = request.getHeader("Authorization")
@@ -58,14 +58,14 @@ class JwtFilter(
 
             if (jwtService.isTokenValid(token)) {
 
-                println("TOKEN VALIDO")
+//                println("TOKEN VALIDO")
 
 
                 val username =
                     jwtService.extractUsername(token)
 
 
-                println("USUARIO JWT: $username")
+//                println("USUARIO JWT: $username")
 
 
                 if (
@@ -79,8 +79,8 @@ class JwtFilter(
                         userDetailsService
                             .loadUserByUsername(username)
 
-                    println("USER DETAILS: $userDetails")
-                    println("AUTHORITIES: ${userDetails.authorities}")
+//                    println("USER DETAILS: $userDetails")
+//                    println("AUTHORITIES: ${userDetails.authorities}")
 
 
                     val authentication =
@@ -105,17 +105,17 @@ class JwtFilter(
                         .authentication = authentication
 
 
-                    println(
-                        "AUTH CREADA: ${SecurityContextHolder.getContext().authentication}"
-                    )
+//                    println(
+//                        "AUTH CREADA: ${SecurityContextHolder.getContext().authentication}"
+//                    )
 
-                    println(
-                        "SECURITY CONTEXT: ${
-                            SecurityContextHolder
-                                .getContext()
-                                .authentication
-                        }"
-                    )
+//                    println(
+//                        "SECURITY CONTEXT: ${
+//                            SecurityContextHolder
+//                                .getContext()
+//                                .authentication
+//                        }"
+//                    )
 
                 }
 
@@ -124,7 +124,7 @@ class JwtFilter(
 
         } catch (e: Exception) {
 
-            println("ERROR JWT: ${e.message}")
+//            println("ERROR JWT: ${e.message}")
 
             SecurityContextHolder
                 .clearContext()

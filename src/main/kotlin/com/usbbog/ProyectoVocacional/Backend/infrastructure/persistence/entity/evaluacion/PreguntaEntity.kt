@@ -4,22 +4,24 @@ import jakarta.persistence.*
 
 @Entity
 @Table(
-    name = "pregunta"
+    name = "pregunta",
 )
-class PreguntaEntity(
+class PreguntaEntity (
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     var id: Long? = null,
 
+    @Column(name = "codigo")
+    var codigo: String? = null,
+
     @Column(name = "id_programa", nullable = false)
     var idPrograma: Long,
 
-    @Column(name = "enunciado", nullable = false)
+    @Column("enunciado", nullable = false)
     var enunciado: String,
 
     @Column(name = "estado", nullable = false)
     var activo: Boolean = true
-
 )

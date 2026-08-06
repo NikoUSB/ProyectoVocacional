@@ -1,4 +1,4 @@
-package com.usbbog.proyectovocacional.backend.application.dto.request
+package com.usbbog.proyectovocacional.backend.application.dto.request.Rol
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -14,6 +14,4 @@ data class RolRequest(
     )
     val nombreRol: String,
 
-
-    val activo: Boolean
 )

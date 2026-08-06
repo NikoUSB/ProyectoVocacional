@@ -1,6 +1,6 @@
 package com.usbbog.proyectovocacional.backend.application.DTOmapper
 
-import com.usbbog.proyectovocacional.backend.application.dto.request.RolRequest
+import com.usbbog.proyectovocacional.backend.application.dto.request.Rol.RolRequest
 import com.usbbog.proyectovocacional.backend.application.dto.response.RolResponse
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.Rol
 
@@ -12,7 +12,7 @@ object RolDtoMapper {
         return Rol(
             id = null,
             nombreRol = request.nombreRol,
-            activo = request.activo
+            activo = true
         )
 
     }
@@ -22,7 +22,7 @@ object RolDtoMapper {
         return Rol(
             id = id,
             nombreRol = request.nombreRol,
-            activo = request.activo
+            activo = true
         )
 
     }

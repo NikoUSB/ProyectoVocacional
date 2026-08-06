@@ -6,5 +6,6 @@ data class Programa (
     val descripcionPrograma: String?,
     val urlPrograma: String?,
     val idArea: Long,
+    val pathLogo: String?,
     val activo: Boolean
 )

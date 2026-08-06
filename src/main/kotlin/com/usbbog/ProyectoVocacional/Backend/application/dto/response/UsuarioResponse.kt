@@ -31,7 +31,7 @@ data class UsuarioResponse(
 
     val departamento: String?,
 
-    val ciudad: String?,
+    val municipio: String?,
 
     val semestre: Int?,
 

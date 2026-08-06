@@ -7,5 +7,9 @@ interface RolActividadJpaRepository : JpaRepository<RolActividadEntity, Long> {
 
     fun findByActivoTrue(): List<RolActividadEntity>
 
+    fun findByIdRol(idRol: Long): List<RolActividadEntity>
+
     fun findByIdRolAndActivoTrue(idRol: Long): List<RolActividadEntity>
+
+    fun findByIdRolAndIdActividad(idRol: Long, idActividad: Long): RolActividadEntity?
 }

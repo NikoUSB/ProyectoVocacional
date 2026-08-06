@@ -16,7 +16,13 @@ class AreaEntity (
     var nombreArea: String,
 
     @Column(name = "descripcion_area")
-    var descripcionArea: String,
+    var perfilPredonimante: String?,
+
+    @Column(name = "perfil_predominante")
+    var descripcionArea: String?,
+
+    @Column(name = "path_logo")
+    var pathLogo: String?,
 
     @Column(name = "estado", nullable = false)
     var activo: Boolean = true

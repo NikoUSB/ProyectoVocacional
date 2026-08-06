@@ -11,8 +11,10 @@ object AreaDtoMapper {
         return Area(
             id = null,
             nombreArea = request.nombreArea,
+            perfilPredonimante = request.perfilPredonimante,
             descripcionArea = request.descripcionArea,
-            activo = request.activo
+            pathLogo = request.pathLogo,
+            activo = true
         )
 
     }
@@ -22,8 +24,10 @@ object AreaDtoMapper {
         return Area(
             id = id,
             nombreArea = request.nombreArea,
+            perfilPredonimante = request.perfilPredonimante,
             descripcionArea = request.descripcionArea,
-            activo = request.activo
+            pathLogo = request.pathLogo,
+            activo = true
         )
 
     }
@@ -33,7 +37,9 @@ object AreaDtoMapper {
         return AreaResponse(
             id = domain.id,
             nombreArea = domain.nombreArea,
-            descripcionArea = domain.descripcionArea
+            perfilPredonimante = domain.perfilPredonimante,
+            descripcionArea = domain.descripcionArea,
+            pathLogo = domain.pathLogo
         )
 
     }

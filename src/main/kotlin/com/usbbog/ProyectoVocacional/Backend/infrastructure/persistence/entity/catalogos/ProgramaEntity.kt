@@ -26,6 +26,9 @@ class ProgramaEntity(
     var idArea:Long,
 
     @Column(name = "estado", nullable = false)
-    var activo: Boolean = true
+    var activo: Boolean = true,
+
+    @Column("path_logo")
+    var pathLogo: String? = null
 
 )

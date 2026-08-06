@@ -46,12 +46,18 @@ class RolService(
     fun guardar(rol: Rol): Rol {
 
         if (rol.id != null) {
-
-            repository.obtenerPorId(rol.id)
+            val rolExistente = repository.obtenerPorId(rol.id)
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "Rol no encontrado."
                 )
+
+            if (!rolExistente.activo) {
+                throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No se puede modificar un rol inactivo."
+                )
+            }
         }
 
         if (repository.existePorNombre(rol.nombreRol)) {
@@ -81,4 +87,23 @@ class RolService(
 
         repository.eliminar(id)
     }
+
+    fun reactivar(id: Long) {
+
+        val rol = repository.obtenerPorId(id)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Rol con id $id no encontrado."
+            )
+
+        if (rol.activo) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El rol ya se encuentra activo."
+            )
+        }
+
+        repository.reactivar(id)
+    }
+
 }

@@ -22,7 +22,7 @@ interface UsuarioRepository{
 
     fun desactivar(id:Long)
 
-    fun reactivar(id:Long    )
+    fun reactivar(id:Long)
 
     fun obtenerUsuarioConRol(value: String): UsuarioLogin?
 

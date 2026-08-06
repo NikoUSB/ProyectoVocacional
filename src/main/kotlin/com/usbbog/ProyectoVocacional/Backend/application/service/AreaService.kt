@@ -1,6 +1,7 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
 import com.usbbog.proyectovocacional.backend.domain.model.catalogo.Area
+import com.usbbog.proyectovocacional.backend.domain.model.catalogo.Programa
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.AreaRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -44,12 +45,18 @@ class AreaService (private val repository: AreaRepository) {
     fun guardar(area: Area): Area {
 
         if (area.id != null) {
-
-            repository.obtenerPorId(area.id)
+            val areaExistente = repository.obtenerPorId(area.id)
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "Area no encontrada."
+                    "Área no encontrada."
                 )
+
+            if (!areaExistente.activo) {
+                throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No se puede modificar un área inactiva."
+                )
+            }
         }
 
         return repository.guardar(area)
@@ -57,20 +64,65 @@ class AreaService (private val repository: AreaRepository) {
 
     fun eliminar(id: Long) {
 
-        val Area = repository.obtenerPorId(id)
+        val area = repository.obtenerPorId(id)
             ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Area con id $id no encontrada."
+                "Área con id $id no encontrada."
             )
 
-        if (!Area.activo) {
+        if (!area.activo) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "El area ya se encuentra inactiva."
+                "El área ya se encuentra inactiva."
             )
         }
 
         repository.eliminar(id)
+    }
+
+    fun reactivar(id: Long) {
+
+        val area = repository.obtenerPorId(id)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Área con id $id no encontrada."
+            )
+
+        if (area.activo) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El área ya se encuentra activa."
+            )
+        }
+
+        repository.reactivar(id)
+    }
+
+    fun obtenerProgramasPorArea(id: Long): List<Programa> {
+
+        val area = repository.obtenerPorId(id)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Área con id $id no encontrada."
+            )
+
+        if (!area.activo) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "El área se encuentra inactiva."
+            )
+        }
+
+        val programas = repository.obtenerProgramasPorArea(id)
+
+        if (programas.isEmpty()) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No se encontraron programas para el área ${area.nombreArea}."
+            )
+        }
+
+        return programas
     }
 
 }

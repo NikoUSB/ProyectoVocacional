@@ -3,8 +3,10 @@ package com.usbbog.proyectovocacional.backend.application.service
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.RolActividad
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.RolActividadRepository
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
+@Service
 class RolActividadService (private val repository: RolActividadRepository) {
 
     fun obtenerTodos(): List<RolActividad> {
@@ -62,7 +64,7 @@ class RolActividadService (private val repository: RolActividadRepository) {
                 "La asociación entre rol y actividad con id $id no encontrada."
             )
 
-        if (!rolActividad.activo) {
+        if (rolActividad.activo) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "La asociación entre rol y actividad ya se encuentra activa."
@@ -70,6 +72,51 @@ class RolActividadService (private val repository: RolActividadRepository) {
         }
 
         repository.reactivar(id)
+    }
+
+    fun actualizarActividades(
+        idRol: Long,
+        idsActividades: List<Long>
+    ) {
+
+        val relacionesExistentes = repository.obtenerTodasPorRol(idRol)
+
+        // Desactivar las relaciones que ya no fueron seleccionadas
+        for (relacion in relacionesExistentes) {
+
+            if (
+                relacion.activo &&
+                relacion.idActividad !in idsActividades
+            ) {
+                repository.desactivar(relacion.id!!)
+            }
+        }
+
+        // Crear o reactivar las actividades seleccionadas
+        for (idActividad in idsActividades) {
+
+            val relacion = repository.obtenerPorRolYActividad(
+                idRol,
+                idActividad
+            )
+
+            when {
+                relacion == null -> {
+                    repository.guardar(
+                        RolActividad(
+                            id = null,
+                            idRol = idRol,
+                            idActividad = idActividad,
+                            activo = true
+                        )
+                    )
+                }
+
+                !relacion.activo -> {
+                    repository.reactivar(relacion.id!!)
+                }
+            }
+        }
     }
 
 

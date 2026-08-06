@@ -41,6 +41,16 @@ class RolRepositoryImpl(
         jpaRepository.save(entity)
     }
 
+    override fun reactivar(id: Long) {
+
+        val entity = jpaRepository.findById(id)
+            .orElseThrow()
+
+        entity.activo = true
+
+        jpaRepository.save(entity)
+    }
+
     override fun existePorNombre(nombre: String): Boolean {
         return jpaRepository.existsByNombreRolIgnoreCase(nombre)
     }

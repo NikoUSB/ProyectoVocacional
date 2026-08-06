@@ -10,7 +10,9 @@ object AreaMapper {
         return Area(
             id = entity.id,
             nombreArea = entity.nombreArea,
+            perfilPredonimante = entity.perfilPredonimante,
             descripcionArea = entity.descripcionArea,
+            pathLogo  = entity.pathLogo,
             activo = entity.activo
         )
 
@@ -21,7 +23,9 @@ object AreaMapper {
         return AreaEntity(
             id = domain.id,
             nombreArea = domain.nombreArea,
+            perfilPredonimante = domain.perfilPredonimante,
             descripcionArea = domain.descripcionArea,
+            pathLogo = domain.pathLogo,
             activo = domain.activo
 
         )

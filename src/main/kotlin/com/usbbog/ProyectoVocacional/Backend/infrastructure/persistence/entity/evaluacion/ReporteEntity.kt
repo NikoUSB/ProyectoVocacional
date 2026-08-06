@@ -16,7 +16,20 @@ class ReporteEntity(
     @Column(name = "id_prueba", nullable = false)
     var idPrueba: Long,
 
-    @Column(name = "ruta_archivo", nullable = false)
+    @Column(name = "id_area_predominante")
+    var idArea: Long,
+
+    @Column(name = "id_programa_1")
+    var idPrograma1: Long,
+
+    @Column(name = "id_programa_2")
+    var idPrograma2: Long,
+
+    @Column(name = "id_programa_3")
+    var idPrograma3: Long,
+
+
+    @Column(name = "`nombre_archivo`", nullable = false)
     var rutaArchivo: String,
 
     @Column(name = "estado", nullable = false)

@@ -2,12 +2,15 @@ package com.usbbog.proyectovocacional.backend.interfaces.controller
 
 import com.usbbog.proyectovocacional.backend.application.dto.request.AreaRequest
 import com.usbbog.proyectovocacional.backend.application.dto.response.AreaResponse
+import com.usbbog.proyectovocacional.backend.application.dto.response.ProgramaResponse
 import com.usbbog.proyectovocacional.backend.application.mapper.AreaDtoMapper
+import com.usbbog.proyectovocacional.backend.application.mapper.ProgramaDtoMapper
 import com.usbbog.proyectovocacional.backend.application.service.AreaService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -83,5 +86,25 @@ class AreaController (
         areaService.eliminar(id)
 
     }
+
+    @PatchMapping("/{id}/reactivar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun reactivar(
+        @PathVariable id: Long
+    ) {
+        areaService.reactivar(id)
+    }
+
+    @GetMapping("/{id}/programas")
+    fun obtenerProgramasPorArea(
+        @PathVariable id: Long
+    ): List<ProgramaResponse> {
+
+        val programas = areaService.obtenerProgramasPorArea(id)
+            .map(ProgramaDtoMapper::toResponse)
+
+        return programas
+    }
+
 
 }

@@ -46,7 +46,8 @@ class SecurityConfig(
                         "/swagger-ui.html",
                         "/v3/api-docs/**",
                         "/webjars/**",
-                        "/api/v1/auth/**"
+                        "/api/v1/auth/**",
+                        "/api/v1/departamentos/**"
 
                     )
                     .permitAll()
