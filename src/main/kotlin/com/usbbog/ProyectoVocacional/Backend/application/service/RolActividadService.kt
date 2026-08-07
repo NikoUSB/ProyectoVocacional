@@ -79,6 +79,9 @@ class RolActividadService (private val repository: RolActividadRepository) {
         idsActividades: List<Long>
     ) {
 
+        if (idRol.toInt() == 1){
+            throw ResponseStatusException(HttpStatus.FORBIDDEN,"No se pueden modificar los permisos de este rol")
+        }
         val relacionesExistentes = repository.obtenerTodasPorRol(idRol)
 
         // Desactivar las relaciones que ya no fueron seleccionadas
