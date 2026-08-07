@@ -30,7 +30,7 @@ class ReporteEntity(
 
 
     @Column(name = "`nombre_archivo`", nullable = false)
-    var rutaArchivo: String,
+    var nombreArchivo: String,
 
     @Column(name = "estado", nullable = false)
     var activo: Boolean = true

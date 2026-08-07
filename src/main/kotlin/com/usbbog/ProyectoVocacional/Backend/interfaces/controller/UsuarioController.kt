@@ -2,8 +2,11 @@ package com.usbbog.proyectovocacional.backend.interfaces.controller
 
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioRolUpdateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.response.PruebaResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.UsuarioResponse
+import com.usbbog.proyectovocacional.backend.application.mapper.PruebaDtoMapper
 import com.usbbog.proyectovocacional.backend.application.mapper.UsuarioDtoMapper
+import com.usbbog.proyectovocacional.backend.application.service.PruebaService
 import com.usbbog.proyectovocacional.backend.application.service.UsuarioService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -20,7 +23,8 @@ import org.springframework.web.bind.annotation.*
 )
 class UsuarioController(
 
-    private val service: UsuarioService
+    private val service: UsuarioService,
+    private val pruebaService: PruebaService
 
 ) {
 
@@ -118,5 +122,15 @@ class UsuarioController(
         return UsuarioDtoMapper.toResponse( service.actualizarRol( id, request.idRol ) )
     }
 
+    @PreAuthorize("hasRole('ROOT') or hasRole('ADMINISTRADOR')")
+    @GetMapping("/{id}/pruebas")
+    fun obtenerPruebasDeUsuario(
+        @PathVariable id: Long
+    ): List<PruebaResponse> {
+
+        return pruebaService.obtenerPruebasDeUsuario(id)
+            .map(PruebaDtoMapper::toResponse)
+
+    }
 
 }

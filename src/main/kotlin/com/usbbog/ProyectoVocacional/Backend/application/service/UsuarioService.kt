@@ -25,7 +25,7 @@ class UsuarioService(
 
 ) {
 
-    private fun obtenerUsuarioAutenticado(): Usuario {
+    fun obtenerUsuarioAutenticado(): Usuario {
 
         val authentication =
             SecurityContextHolder

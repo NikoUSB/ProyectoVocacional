@@ -2,6 +2,8 @@ package com.usbbog.proyectovocacional.backend.infrastructure.persistence.reposit
 
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Pregunta
 import com.usbbog.proyectovocacional.backend.domain.repository.evaluacion.PreguntaRepository
+import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.catalogo.lugares.DepartamentoMapper
+import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.catalogo.lugares.DepartamentoMapper.toDomain
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.evaluacion.PreguntaMapper
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.repository.PreguntaJpaRepository
 import org.springframework.stereotype.Repository
@@ -17,6 +19,11 @@ class PreguntaRepositoryImpl(private val jpaRepository: PreguntaJpaRepository) :
         jpaRepository.findById(id)
             .map(PreguntaMapper::toDomain)
             .orElse(null)
+
+    override fun obtenerPorCodigo(codigo: String): Pregunta? =
+        jpaRepository.findByCodigo(codigo)
+            ?.let(PreguntaMapper::toDomain)
+
 
     override fun guardar(pregunta: Pregunta): Pregunta {
 

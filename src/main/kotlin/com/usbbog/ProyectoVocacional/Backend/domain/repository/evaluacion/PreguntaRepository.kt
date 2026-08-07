@@ -8,6 +8,8 @@ interface PreguntaRepository {
 
     fun obtenerPorId(id: Long): Pregunta?
 
+    fun obtenerPorCodigo(codigo: String): Pregunta?
+
     fun guardar(pregunta: Pregunta): Pregunta
 
     fun eliminar(id: Long)
