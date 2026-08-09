@@ -1,7 +1,10 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
+import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.PasswordRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.response.usuario.UsuarioPerfilResponse
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.Usuario
+import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.LugarRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.ProgramaRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.RolRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.UsuarioRepository
@@ -20,6 +23,8 @@ class UsuarioService(
     private val rolRepository: RolRepository,
 
     private val programaRepository: ProgramaRepository,
+
+    private val lugarRepository: LugarRepository,
 
     private val passwordService: PasswordService
 
@@ -45,18 +50,9 @@ class UsuarioService(
             )
     }
 
-    fun actualizarPerfil(id: Long, request: UsuarioPerfilUpdateRequest): Usuario {
+    fun actualizarPerfil(request: UsuarioPerfilUpdateRequest): Usuario {
 
         val usuario = obtenerUsuarioAutenticado()
-
-        if (usuario.id != id) {
-
-            throw ResponseStatusException(
-                HttpStatus.FORBIDDEN,
-                "No puede modificar el perfil de otro usuario."
-            )
-
-        }
 
         if (!usuario.activo) {
             throw ResponseStatusException(
@@ -66,33 +62,29 @@ class UsuarioService(
         }
 
         validarPrograma(request.idPrograma)
+        validarUbicacion(request.departamento, request.municipio)
 
         val actualizado = usuario.copy(
+            nombre = request.nombre ?: usuario.nombre,
+            apellidos = request.apellidos ?: usuario.apellidos,
 
-            idPrograma = request.idPrograma,
+            telefono = request.telefono ?: usuario.telefono,
+            genero = request.genero ?: usuario.genero,
+            generoOtro = request.generoOtro ?: usuario.generoOtro,
 
-            nombre = request.nombre,
-            apellidos = request.apellidos,
+            departamento = request.departamento ?: usuario.departamento,
+            municipio = request.municipio ?: usuario.municipio,
 
-            telefono = request.telefono,
-
-            genero = request.genero,
-            generoOtro = request.generoOtro,
-
-            departamento = request.departamento,
-            ciudad = request.municipio,
-
-            semestre = request.semestre
-
+            idPrograma = request.idPrograma ?: usuario.idPrograma,
+            semestre = request.semestre ?: usuario.semestre
         )
 
-        return repository.guardar(actualizado)
+        repository.guardar(actualizado)
+
+        return actualizado
     }
 
-    fun actualizarRol(
-        id: Long,
-        idRol: Long
-    ): Usuario {
+    fun actualizarRol(id: Long, idRol: Long): Usuario {
 
         val usuario = repository.obtenerPorId(id)
             ?: throw ResponseStatusException(
@@ -109,11 +101,35 @@ class UsuarioService(
 
         validarRol(idRol)
 
-        return repository.guardar(
+        return repository.guardar(usuario.copy(idRol = idRol))
+    }
+
+    fun cambiarPassword(request: PasswordRequest) : ResponseStatusException{
+
+        val usuario = obtenerUsuarioAutenticado()
+
+        if (!passwordService.matches(request.passwordActual, usuario.contrasenaHash)) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "La contraseña actual no es correcta."
+            )
+        }
+
+        if (request.passwordActual == request.passwordNueva) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "La nueva contraseña debe ser diferente a la actual."
+            )
+        }
+
+        repository.guardar(
             usuario.copy(
-                idRol = idRol
+                contrasenaHash = passwordService.encode(request.passwordNueva)
             )
         )
+
+        return ResponseStatusException(HttpStatus.OK, "Se ha actualizado correctamente.")
+
     }
 
     fun obtenerTodos():List<Usuario>{
@@ -138,7 +154,6 @@ class UsuarioService(
 
     }
 
-
     fun obtenerPorId(id:Long):Usuario{
 
         val usuario = repository.obtenerPorId(id)
@@ -162,16 +177,15 @@ class UsuarioService(
 
     }
 
-
-    fun guardar(
-        usuario:Usuario
-    ):Usuario{
+    fun guardar(usuario:Usuario) : Usuario {
 
         validarRol(usuario.idRol)
         validarPrograma(usuario.idPrograma)
+        validarUbicacion(usuario.departamento, usuario.municipio)
         validarDocumento(usuario)
         validarCorreo(usuario)
         validarNombreUsuario(usuario)
+
         return repository.guardar(
             usuario.copy(
                 contrasenaHash = passwordService.encode(usuario.contrasenaHash),
@@ -180,13 +194,9 @@ class UsuarioService(
                     LocalDateTime.now()
             )
         )
-
     }
 
-
-    fun eliminar(
-        id:Long
-    ){
+    fun eliminar(id:Long) : ResponseStatusException {
 
 
         val usuario =
@@ -217,13 +227,24 @@ class UsuarioService(
 
         repository.desactivar(id)
 
+        return ResponseStatusException(HttpStatus.OK, "Se ha desacrivado el usuario ${usuario.nombreUsuario}.")
+
     }
 
-    fun reactivar(
+    fun eliminarPerfilPropio(): ResponseStatusException{
 
-        id:Long
+        val usuario = obtenerUsuarioAutenticado()
 
-    ){
+        if (!usuario.activo) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Tu cuenta ya se encuentra inactiva.")
+        }
+
+        repository.desactivar(usuario.id!!)
+
+        return ResponseStatusException(HttpStatus.OK, "Se ha eliminado tu perfil.")
+    }
+
+    fun reactivar(id:Long): ResponseStatusException{
 
         val usuario = repository.obtenerPorId(id)
 
@@ -253,12 +274,12 @@ class UsuarioService(
             id
         )
 
+        return ResponseStatusException(HttpStatus.OK, "Se ha reactivado el usuario ${usuario.nombreUsuario}.")
+
     }
 
-
-    private fun validarRol(
-        idRol: Long
-    ) {
+    //VALIDACIONES
+    private fun validarRol(idRol: Long) {
 
         rolRepository.obtenerPorId(idRol)
             ?: throw ResponseStatusException(
@@ -267,26 +288,55 @@ class UsuarioService(
             )
     }
 
-    private fun validarPrograma(
-        idPrograma: Long?
-    ) {
+    private fun validarPrograma(idPrograma: Long?) {
 
         if (idPrograma == null) {
             return
         }
 
-        programaRepository.obtenerPorId(idPrograma)
+
+        val programa = programaRepository.obtenerPorId(idPrograma)
             ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "El programa seleccionado no existe."
             )
+
+        if (programa.urlPrograma == null) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El programa seleccionado no hace parte del catalogo de la Universidad de San Buenaventura."
+            )
+        }
     }
 
+    private fun validarUbicacion(idDepartamento: String?, idMunicipio: String?) {
 
+        if (idDepartamento == null && idMunicipio == null) return
 
-    private fun validarDocumento(
-        usuario:Usuario
-    ){
+        if (idDepartamento == null || idMunicipio == null) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Debes indicar tanto el departamento como el municipio."
+            )
+        }
+
+        lugarRepository.obtenerDepartamentoPorId(idDepartamento)
+            ?: throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El departamento indicado no existe."
+            )
+
+        val municipiosValidos = lugarRepository.obtenerMunicipiosPorDepartamento(idDepartamento)
+
+        if (municipiosValidos.none { it.idMunicipio == idMunicipio }) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El municipio no pertenece al departamento indicado."
+            )
+        }
+    }
+
+    private fun validarDocumento(usuario:Usuario){
 
         if(
 
@@ -311,13 +361,7 @@ class UsuarioService(
 
     }
 
-
-
-    private fun validarCorreo(
-
-        usuario:Usuario
-
-    ){
+    private fun validarCorreo(usuario:Usuario){
 
         val usuarioEncontrado =
 
@@ -346,7 +390,6 @@ class UsuarioService(
         }
 
     }
-
 
     private fun validarNombreUsuario(usuario: Usuario) {
 

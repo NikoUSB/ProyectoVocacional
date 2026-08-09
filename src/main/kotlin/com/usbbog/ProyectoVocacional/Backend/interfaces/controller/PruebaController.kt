@@ -1,10 +1,13 @@
 package com.usbbog.proyectovocacional.backend.interfaces.controller
 
 import com.usbbog.proyectovocacional.backend.application.dto.request.evaluacion.PruebaCreateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.response.PreguntaResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.ResultadoPruebaResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.PruebaResponse
+import com.usbbog.proyectovocacional.backend.application.mapper.PreguntaDtoMapper
 import com.usbbog.proyectovocacional.backend.application.mapper.PruebaDtoMapper
 import com.usbbog.proyectovocacional.backend.application.service.PruebaService
+import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Pregunta
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -19,6 +22,11 @@ import org.springframework.web.bind.annotation.*
 class PruebaController(
     private val service: PruebaService
 ) {
+
+    @GetMapping("/cuestionario")
+    fun obtenerCuestionario() : List<PreguntaResponse> {
+        return service.generarCuestionario().map(PreguntaDtoMapper::toResponse)
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

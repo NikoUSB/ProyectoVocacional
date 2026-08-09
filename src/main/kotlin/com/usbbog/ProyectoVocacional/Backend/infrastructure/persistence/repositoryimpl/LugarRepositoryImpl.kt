@@ -9,6 +9,7 @@ import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.c
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.repository.DepartamentoJpaRepository
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.repository.MunicipioJpaRepository
 import org.springframework.stereotype.Repository
+import kotlin.collections.map
 
 @Repository
 class LugarRepositoryImpl (
@@ -23,6 +24,10 @@ class LugarRepositoryImpl (
     override fun obtenerDepartamentoPorId(idDepartamento: String): Departamento? =
         departamentoRepository.findByIdDepartamento(idDepartamento)
             ?.let(DepartamentoMapper::toDomain)
+
+    override fun obtenerMunicipioPorId(idMunicipio: String): Municipio? =
+        municipioRepository.findByIdMunicipio(idMunicipio)
+            ?.let(MunicipioMapper::toDomain)
 
     override fun obtenerMunicipiosPorDepartamento(idDepartamento: String): List<Municipio> {
         return municipioRepository.findByIdDepartamento(idDepartamento)

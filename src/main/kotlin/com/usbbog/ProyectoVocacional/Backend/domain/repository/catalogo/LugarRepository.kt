@@ -7,6 +7,8 @@ interface LugarRepository {
 
     fun obtenerDepartamentos(): List<Departamento>
 
+    fun obtenerMunicipioPorId(idMunicipio: String): Municipio?
+
     fun obtenerDepartamentoPorId(idDepartamento: String): Departamento?
 
     fun obtenerMunicipiosPorDepartamento(idDepartamento: String): List<Municipio>

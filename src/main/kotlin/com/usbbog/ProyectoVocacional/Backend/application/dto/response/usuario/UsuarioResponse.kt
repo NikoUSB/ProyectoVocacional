@@ -1,4 +1,4 @@
-package com.usbbog.proyectovocacional.backend.application.dto.response
+package com.usbbog.proyectovocacional.backend.application.dto.response.usuario
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -7,9 +7,9 @@ data class UsuarioResponse(
 
     val id: Long?,
 
-    val idRol: Long,
+    val Rol: String,
 
-    val idPrograma: Long?,
+    val tipoUsuario: String,
 
     val nombre: String,
 
@@ -32,6 +32,8 @@ data class UsuarioResponse(
     val departamento: String?,
 
     val municipio: String?,
+
+    val programa: String?,
 
     val semestre: Int?,
 

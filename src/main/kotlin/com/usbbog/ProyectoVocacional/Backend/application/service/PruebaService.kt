@@ -1,9 +1,11 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
 import com.usbbog.proyectovocacional.backend.application.dto.request.evaluacion.PruebaCreateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.response.PreguntaResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.ProgramaAfinidadResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.ResultadoPruebaResponse
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.AfinidadPrograma
+import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Pregunta
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Prueba
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Reporte
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.AreaRepository
@@ -34,6 +36,65 @@ class PruebaService(
     private val areaRepository: AreaRepository
 
 ) {
+
+    fun generarCuestionario(): List<Pregunta> {
+
+        // Cantidad total de preguntas activas disponibles
+        val totalPreguntas = preguntaRepository
+            .obtenerTodos()
+            .size
+
+        // Áreas activas en orden aleatorio
+        val areas = areaRepository
+            .obtenerTodos()
+            .shuffled()
+
+        // Lista final de preguntas
+        val preguntasSeleccionadas = mutableListOf<Pregunta>()
+
+        // Recorrer áreas aleatoriamente
+        for (area in areas) {
+
+            // Obtener programas del área y aleatorizar su orden
+            val programas = areaRepository
+                .obtenerProgramasPorArea(area.id!!)
+                .shuffled()
+
+            // Recorrer programas aleatoriamente
+            for (programa in programas) {
+
+                // Si ya alcanzamos el total, terminamos
+                if (preguntasSeleccionadas.size >= totalPreguntas) {
+                    break
+                }
+
+                // Obtener TODAS las preguntas del programa
+                // y aleatorizar su orden interno
+                val preguntasPrograma = programaRepository
+                    .obtenerPreguntasPorPrograma(programa.id!!)
+                    .shuffled()
+
+                // Agregar todas las preguntas del programa
+                preguntasSeleccionadas += preguntasPrograma
+            }
+
+            // Si ya alcanzamos el total, no procesamos más áreas
+            if (preguntasSeleccionadas.size >= totalPreguntas) {
+                break
+            }
+        }
+
+        // Validar que se hayan obtenido todas las preguntas
+        if (preguntasSeleccionadas.size != totalPreguntas) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "No fue posible generar el cuestionario completo."
+            )
+        }
+
+        return preguntasSeleccionadas
+    }
+
 
     @Transactional
     fun presentar(request: PruebaCreateRequest): ResultadoPruebaResponse {
@@ -151,11 +212,11 @@ class PruebaService(
                 idPrueba = prueba.id?: throw ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "La prueba no tiene un id asignado."
-                ),                                   //espera un Long? pero es Long
+                ),
                 idAreaPredominante = idAreaPredominante,
                 idPrograma1 = top3[0].idPrograma,
                 idPrograma2 = top3[1].idPrograma,
-                idPrograma3 = top3[2].idPrograma ,  //espera un Long pero es Long?
+                idPrograma3 = top3[2].idPrograma ,
                 nombreArchivo = nombreReporte,
                 activo = true
             )
@@ -224,6 +285,17 @@ class PruebaService(
         val pruebas = pruebaRepository.obtenerPorUsuario(usuario.id!!)
 
         if (pruebas.isEmpty()) throw ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron pruebas.")
+
+        return pruebas
+    }
+
+    fun obtenerPruebasPropias(): List<Prueba> {
+
+        val usuario = usuarioService.obtenerUsuarioAutenticado()
+
+        val pruebas = pruebaRepository.obtenerPorUsuario(usuario.id!!)
+
+        if (pruebas.isEmpty()) throw ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron pruebas de ${usuario.nombre}.")
 
         return pruebas
     }

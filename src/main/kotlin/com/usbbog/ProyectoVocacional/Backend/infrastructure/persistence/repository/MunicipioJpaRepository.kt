@@ -4,5 +4,8 @@ import com.usbbog.proyectovocacional.backend.infrastructure.persistence.entity.c
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface MunicipioJpaRepository : JpaRepository<MunicipioEntity, String> {
+
+    fun findByIdMunicipio(idMunicipio: String): MunicipioEntity?
+
     fun findByIdDepartamento(idDepartamento: String): List<MunicipioEntity>
 }

@@ -17,7 +17,7 @@ data class Usuario(
     val genero: String?,
     val generoOtro: String?,
     val departamento: String?,
-    val ciudad: String?,
+    val municipio: String?,
     val idPrograma: Long?,
     val semestre: Int?,
     val fechaCreacion: LocalDateTime?,

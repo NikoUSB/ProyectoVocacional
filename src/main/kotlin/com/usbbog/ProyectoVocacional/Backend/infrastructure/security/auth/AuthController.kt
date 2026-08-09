@@ -1,7 +1,7 @@
 package com.usbbog.proyectovocacional.backend.infrastructure.security.auth
 
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioCreateRequest
-import com.usbbog.proyectovocacional.backend.application.dto.response.UsuarioResponse
+import com.usbbog.proyectovocacional.backend.application.dto.response.usuario.UsuarioResponse
 import com.usbbog.proyectovocacional.backend.application.mapper.UsuarioDtoMapper
 import com.usbbog.proyectovocacional.backend.application.service.UsuarioService
 import com.usbbog.proyectovocacional.backend.infrastructure.security.dto.LoginRequest
@@ -24,6 +24,7 @@ class AuthController(
 
     private val authService: AuthService,
     private val usuarioService: UsuarioService,
+    private val usuarioDtoMapper: UsuarioDtoMapper,
     private val passwordService: PasswordService
 
 ) {
@@ -58,11 +59,11 @@ class AuthController(
 
     ): UsuarioResponse {
 
-        return UsuarioDtoMapper.toResponse(
+        return usuarioDtoMapper.toResponse(
 
             usuarioService.guardar(
 
-                UsuarioDtoMapper.toDomain(
+                usuarioDtoMapper.toDomain(
                     request
                 )
 

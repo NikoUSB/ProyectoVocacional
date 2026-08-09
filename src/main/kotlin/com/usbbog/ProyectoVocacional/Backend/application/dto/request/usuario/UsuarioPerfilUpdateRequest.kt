@@ -4,18 +4,11 @@ import jakarta.validation.constraints.*
 
 data class UsuarioPerfilUpdateRequest(
 
-    @field:NotNull
-    val idRol: Long,
-
-    val idPrograma: Long? = null,
-
-    @field:NotBlank
     @field:Size(max = 100)
-    val nombre: String,
+    val nombre: String?,
 
-    @field:NotBlank
     @field:Size(max = 100)
-    val apellidos: String,
+    val apellidos: String?,
 
     val telefono: String?,
 
@@ -27,6 +20,8 @@ data class UsuarioPerfilUpdateRequest(
 
     val municipio: String?,
 
-    val semestre: Int?,
+    val idPrograma: Long?,
+
+    val semestre: Int?
 
 )

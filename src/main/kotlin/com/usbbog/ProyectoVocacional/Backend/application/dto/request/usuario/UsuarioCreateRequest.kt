@@ -70,9 +70,9 @@ data class UsuarioCreateRequest(
     @field:NotBlank(
         message = "La contraseña es obligatoria."
     )
-    @field:Size(
-        min = 8,
-        message = "La contraseña debe tener al menos 8 caracteres."
+    @field:Pattern(
+        regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
+        message = "La contraseña debe tener mínimo 8 caracteres, una mayúscula, un número y un símbolo."
     )
     val contrasena: String
 
