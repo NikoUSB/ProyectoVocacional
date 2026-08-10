@@ -39,7 +39,9 @@ class PermissionFilter(
 
                 url.startsWith("/api/v1/auth") ||
 
-                url.startsWith("/api/v1/departamentos")
+                url.startsWith("/api/v1/departamentos") ||
+
+                url.startsWith("/api/v1/catalogos")
 
             )
 
