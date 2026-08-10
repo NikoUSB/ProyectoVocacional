@@ -1,6 +1,7 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
 import com.usbbog.proyectovocacional.backend.application.dto.request.evaluacion.PruebaCreateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.response.AfinidadAreaResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.ProgramaAfinidadResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.ResultadoPruebaResponse
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.AfinidadPrograma
@@ -51,10 +52,10 @@ class PruebaService(
         val preguntasActivas = preguntaRepository.obtenerTodos()
         val preguntasPorId = preguntasActivas.associateBy { it.id }
 
-        if (request.respuestas.size != preguntasActivas.size) {
+        if (request.respuestas.isEmpty()) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "Debes responder todas las preguntas (${preguntasPorId.size}/${preguntasActivas.size})."
+                "Debes responder al menos una pregunta."
             )
         }
 
@@ -122,6 +123,14 @@ class PruebaService(
 
         val porArea = afinidades.groupBy { programasPorId.getValue(it.idPrograma).idArea }
         val promedioPorArea = porArea.mapValues { (_, l) -> l.map { it.valorAfinidad.toDouble() }.average() }
+
+        if (promedioPorArea.isEmpty()) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Debes responder al menos una pregunta válida."
+            )
+        }
+
         val maxPromedio = promedioPorArea.values.max()
         val empatadas = promedioPorArea.filterValues { it == maxPromedio }.keys
 
@@ -137,25 +146,39 @@ class PruebaService(
                 .first()
         }
 
-        // 6. Top 3 programas globales
+        // 6. Afinidad por área (todas las áreas activas; 0 si no fue evaluada)
+        val afinidadPorArea = areaRepository.obtenerTodos()
+            .map { area ->
+                AfinidadAreaResponse(
+                    idArea = area.id!!,
+                    nombreArea = area.nombreArea,
+                    valorAfinidad = area.id?.let { promedioPorArea[it]?.roundToInt() } ?: 0,
+                    perfil = area.perfilPredonimante,
+                    descripcionArea = area.descripcionArea,
+                    pathLogo = area.pathLogo
+                )
+            }
+            .sortedByDescending { it.valorAfinidad }
+
+        // 7. Top 3 programas globales
         val top3 = afinidades.sortedWith(
             compareByDescending<AfinidadPrograma> { it.valorAfinidad }.thenBy { it.idPrograma }
         ).take(3)
 
-        // 7. Reporte
+        // 8. Reporte
         val nombreReporte = "U${usuario.documento}P${prueba.id}"
 
         reporteRepository.guardar(
             Reporte(
                 id = null,
-                idPrueba = prueba.id?: throw ResponseStatusException(
+                idPrueba = prueba.id ?: throw ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "La prueba no tiene un id asignado."
-                ),                                   //espera un Long? pero es Long
+                ),
                 idAreaPredominante = idAreaPredominante,
-                idPrograma1 = top3[0].idPrograma,
-                idPrograma2 = top3[1].idPrograma,
-                idPrograma3 = top3[2].idPrograma ,  //espera un Long pero es Long?
+                idPrograma1 = top3.getOrNull(0)?.idPrograma ?: 0L,
+                idPrograma2 = top3.getOrNull(1)?.idPrograma ?: 0L,
+                idPrograma3 = top3.getOrNull(2)?.idPrograma ?: 0L,
                 nombreArchivo = nombreReporte,
                 activo = true
             )
@@ -163,18 +186,30 @@ class PruebaService(
 
         val area = areaRepository.obtenerPorId(idAreaPredominante)!!
 
+        val url = "/api/v1/pruebas/${prueba.id}/reporte"
+
         return ResultadoPruebaResponse(
-            idPrueba = prueba.id,               //espera un Long pero es Long?
+            idPrueba = prueba.id!!,
+            fecha = prueba.fecha,
             idAreaPredominante = area.id!!,
             nombreAreaPredominante = area.nombreArea,
+            perfil = area.perfilPredonimante,
+            descripcionArea = area.descripcionArea,
+            afinidadPorArea = afinidadPorArea,
             programasRecomendados = top3.map {
+                val programa = programasPorId.getValue(it.idPrograma)
                 ProgramaAfinidadResponse(
-                    it.idPrograma,
-                    programasPorId.getValue(it.idPrograma).nombrePrograma,
-                    it.valorAfinidad.toInt()
+                    idPrograma = it.idPrograma,
+                    nombrePrograma = programa.nombrePrograma,
+                    valorAfinidad = it.valorAfinidad.toInt(),
+                    descripcionPrograma = programa.descripcionPrograma,
+                    urlPrograma = programa.urlPrograma,
+                    pathLogo = programa.pathLogo,
+                    nombreArea = areaRepository.obtenerPorId(programa.idArea)?.nombreArea
                 )
             },
-            nombreReporte = nombreReporte
+            nombreReporte = nombreReporte,
+            url = url
         )
     }
 
@@ -197,23 +232,61 @@ class PruebaService(
         val reporte = reporteRepository.obtenerPorPrueba(idPrueba)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Esta prueba aún no tiene reporte.")
 
-        val idsTop3 = listOfNotNull(reporte.idPrograma1, reporte.idPrograma2, reporte.idPrograma3)
+        val afinidades = afinidadProgramaRepository.obtenerPorPrueba(idPrueba)
 
-        val top3 = afinidadProgramaRepository.obtenerPorPrueba(idPrueba)
-            .filter { it.idPrograma in idsTop3 }
+        val top3 = afinidades
             .sortedByDescending { it.valorAfinidad }
+            .take(3)
 
         val area = areaRepository.obtenerPorId(reporte.idAreaPredominante!!)!!
 
+        // Afinidad por área a partir de las afinidades guardadas por programa
+        val programasPorId = afinidades.map { it.idPrograma }.distinct()
+            .associateWith { programaRepository.obtenerPorId(it) }
+
+        val afinidadPorArea = afinidades
+            .mapNotNull { afinidad ->
+                val programa = programasPorId[afinidad.idPrograma] ?: return@mapNotNull null
+                programa.idArea to afinidad
+            }
+            .groupBy { it.first }
+            .map { (idArea, parejas) ->
+                val promedio = (parejas.sumOf { it.second.valorAfinidad.toDouble() } / parejas.size).roundToInt()
+                val area = areaRepository.obtenerPorId(idArea)
+                AfinidadAreaResponse(
+                    idArea = idArea,
+                    nombreArea = area?.nombreArea ?: "Sin área",
+                    valorAfinidad = promedio,
+                    perfil = area?.perfilPredonimante,
+                    descripcionArea = area?.descripcionArea,
+                    pathLogo = area?.pathLogo
+                )
+            }
+            .sortedByDescending { it.valorAfinidad }
+
         return ResultadoPruebaResponse(
             idPrueba = idPrueba,
+            fecha = prueba.fecha,
             idAreaPredominante = area.id!!,
             nombreAreaPredominante = area.nombreArea,
-            programasRecomendados = top3.map {
-                val programa = programaRepository.obtenerPorId(it.idPrograma)!!
-                ProgramaAfinidadResponse(it.idPrograma, programa.nombrePrograma, it.valorAfinidad.toInt())
+            perfil = area.perfilPredonimante,
+            descripcionArea = area.descripcionArea,
+            afinidadPorArea = afinidadPorArea,
+            programasRecomendados = top3.map { afinidad ->
+                val programa = programaRepository.obtenerPorId(afinidad.idPrograma)
+                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Programa no encontrado.")
+                ProgramaAfinidadResponse(
+                    idPrograma = afinidad.idPrograma,
+                    nombrePrograma = programa.nombrePrograma,
+                    valorAfinidad = afinidad.valorAfinidad.toInt(),
+                    descripcionPrograma = programa.descripcionPrograma,
+                    urlPrograma = programa.urlPrograma,
+                    pathLogo = programa.pathLogo,
+                    nombreArea = areaRepository.obtenerPorId(programa.idArea)?.nombreArea
+                )
             },
-            nombreReporte = reporte.nombreArchivo
+            nombreReporte = reporte.nombreArchivo,
+            url = "/api/v1/pruebas/${idPrueba}/reporte"
         )
     }
 

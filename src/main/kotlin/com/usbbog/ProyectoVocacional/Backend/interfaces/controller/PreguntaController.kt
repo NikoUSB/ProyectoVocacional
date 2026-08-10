@@ -2,6 +2,7 @@ package com.usbbog.proyectovocacional.backend.interfaces.controller
 
 
 import com.usbbog.proyectovocacional.backend.application.dto.request.PreguntaRequest
+import com.usbbog.proyectovocacional.backend.application.dto.response.PreguntaPruebaResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.PreguntaResponse
 import com.usbbog.proyectovocacional.backend.application.mapper.PreguntaDtoMapper
 import com.usbbog.proyectovocacional.backend.application.service.PreguntaService
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -43,6 +45,15 @@ class PreguntaController(
 
         val pregunta = preguntaService.obtenerPorId(id)
         return PreguntaDtoMapper.toResponse(pregunta)
+
+    }
+
+    @GetMapping("/para-prueba")
+    fun obtenerParaPrueba(
+        @RequestParam(value = "porArea", required = false) porArea: Int?
+    ): List<PreguntaPruebaResponse> {
+
+        return preguntaService.obtenerParaPrueba(porArea)
 
     }
 

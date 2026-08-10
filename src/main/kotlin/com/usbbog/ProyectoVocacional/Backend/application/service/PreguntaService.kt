@@ -1,7 +1,9 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
 
+import com.usbbog.proyectovocacional.backend.application.dto.response.PreguntaPruebaResponse
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Pregunta
+import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.AreaRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.ProgramaRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.evaluacion.PreguntaRepository
 import org.springframework.http.HttpStatus
@@ -11,7 +13,8 @@ import org.springframework.web.server.ResponseStatusException
 @Service
 class PreguntaService (
     private val repository: PreguntaRepository,
-    private val programaRepository: ProgramaRepository
+    private val programaRepository: ProgramaRepository,
+    private val areaRepository: AreaRepository
 ) {
 
     fun obtenerTodos(): List<Pregunta> {
@@ -26,6 +29,56 @@ class PreguntaService (
         }
 
         return programas
+    }
+
+    fun obtenerParaPrueba(porArea: Int?): List<PreguntaPruebaResponse> {
+
+        val programas = programaRepository.obtenerTodos()
+        val preguntas = repository.obtenerTodos()
+
+        val preguntasPorPrograma = preguntas.groupBy { it.idPrograma }
+        val programasPorArea = programas.groupBy { it.idArea }
+
+        val seleccionadas = if (porArea == null) {
+            programasPorArea
+                .toList()
+                .shuffled()
+                .flatMap { (_, programasDelArea) ->
+                    programasDelArea
+                        .shuffled()
+                        .flatMap { programa ->
+                            preguntasPorPrograma[programa.id!!].orEmpty().shuffled()
+                        }
+                }
+        } else {
+            val cantidadPorArea = porArea.coerceAtLeast(1)
+            programasPorArea
+                .toList()
+                .shuffled()
+                .flatMap { (_, programasDelArea) ->
+                    programasDelArea
+                        .shuffled()
+                        .flatMap { programa ->
+                            preguntasPorPrograma[programa.id!!].orEmpty().shuffled()
+                        }
+                        .take(cantidadPorArea)
+                }
+        }
+
+        val mapaProgramas = programas.associateBy { it.id!! }
+
+        return seleccionadas.map { pregunta ->
+            val programa = mapaProgramas.getValue(pregunta.idPrograma)
+            PreguntaPruebaResponse(
+                id = pregunta.id!!,
+                codigo = pregunta.codigo,
+                enunciado = pregunta.enunciado,
+                idPrograma = pregunta.idPrograma,
+                nombrePrograma = programa.nombrePrograma,
+                idArea = programa.idArea,
+                nombreArea = areaRepository.obtenerPorId(programa.idArea)?.nombreArea ?: "Sin área"
+            )
+        }
     }
 
     fun obtenerPorId(id: Long): Pregunta {

@@ -61,17 +61,39 @@ class UsuarioController(
     }
 
     @Operation(
-        summary = "Actualizar datos del usuario."
+        summary = "Actualizar datos del usuario autenticado."
     )
     @PutMapping("/me/perfil")
     fun actualizarPerfil(
-        @PathVariable id: Long,
         @Valid @RequestBody request: UsuarioPerfilUpdateRequest
     ): UsuarioResponse {
 
         return UsuarioDtoMapper.toResponse(
-            service.actualizarPerfil(id, request)
+            service.actualizarPerfil(request)
         )
+    }
+
+    @GetMapping("/me")
+    @Operation(
+        summary = "Obtener el perfil del usuario autenticado."
+    )
+    fun obtenerPerfilAutenticado(): UsuarioResponse {
+
+        return UsuarioDtoMapper.toResponse(
+            service.obtenerUsuarioAutenticado()
+        )
+
+    }
+
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(
+        summary = "Eliminar la cuenta del usuario autenticado."
+    )
+    fun eliminarCuentaPropia() {
+
+        service.eliminarCuentaPropia()
+
     }
 
 

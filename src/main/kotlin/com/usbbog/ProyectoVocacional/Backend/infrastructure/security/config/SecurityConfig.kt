@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -17,7 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
 
     private val jwtFilter: JwtFilter,
-    private val permissionFilter: PermissionFilter
+    private val permissionFilter: PermissionFilter,
+    private val corsConfigurationSource: CorsConfigurationSource
 
 ) {
 
@@ -34,6 +36,10 @@ class SecurityConfig(
                 it.disable()
             }
 
+            .cors {
+                it.configurationSource(corsConfigurationSource)
+            }
+
             .authorizeHttpRequests {
 
                 it
@@ -47,7 +53,8 @@ class SecurityConfig(
                         "/v3/api-docs/**",
                         "/webjars/**",
                         "/api/v1/auth/**",
-                        "/api/v1/departamentos/**"
+                        "/api/v1/departamentos/**",
+                        "/api/v1/catalogos/**"
 
                     )
                     .permitAll()

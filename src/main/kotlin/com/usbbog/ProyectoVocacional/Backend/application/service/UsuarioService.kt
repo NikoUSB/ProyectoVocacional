@@ -45,18 +45,9 @@ class UsuarioService(
             )
     }
 
-    fun actualizarPerfil(id: Long, request: UsuarioPerfilUpdateRequest): Usuario {
+    fun actualizarPerfil(request: UsuarioPerfilUpdateRequest): Usuario {
 
         val usuario = obtenerUsuarioAutenticado()
-
-        if (usuario.id != id) {
-
-            throw ResponseStatusException(
-                HttpStatus.FORBIDDEN,
-                "No puede modificar el perfil de otro usuario."
-            )
-
-        }
 
         if (!usuario.activo) {
             throw ResponseStatusException(
@@ -87,6 +78,33 @@ class UsuarioService(
         )
 
         return repository.guardar(actualizado)
+    }
+
+    fun eliminarCuentaPropia() {
+
+        val usuario = obtenerUsuarioAutenticado()
+
+        if (usuario.idRol == 1L) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El rol ROOT no puede eliminar su propia cuenta."
+            )
+        }
+
+        if (!usuario.activo) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El usuario ya se encuentra inactivo."
+            )
+        }
+
+        val id = usuario.id
+            ?: throw ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Usuario no identificado."
+            )
+
+        repository.desactivar(id)
     }
 
     fun actualizarRol(
