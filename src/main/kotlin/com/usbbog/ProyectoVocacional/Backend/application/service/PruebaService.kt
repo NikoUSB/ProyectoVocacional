@@ -5,6 +5,7 @@ import com.usbbog.proyectovocacional.backend.application.dto.response.AfinidadAr
 import com.usbbog.proyectovocacional.backend.application.dto.response.ProgramaAfinidadResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.ResultadoPruebaResponse
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.AfinidadPrograma
+import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Pregunta
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Prueba
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Reporte
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.AreaRepository
@@ -312,7 +313,6 @@ class PruebaService(
         return pruebas
     }
 
-
     fun obtenerPorId(id: Long): Prueba {
         val usuario = usuarioService.obtenerUsuarioAutenticado()
 
@@ -324,6 +324,64 @@ class PruebaService(
         }
 
         return prueba
+    }
+
+    fun generarCuestionario(): List<Pregunta> {
+
+        // Cantidad total de preguntas activas disponibles
+        val totalPreguntas = preguntaRepository
+            .obtenerTodos()
+            .size
+
+        // Áreas activas en orden aleatorio
+        val areas = areaRepository
+            .obtenerTodos()
+            .shuffled()
+
+        // Lista final de preguntas
+        val preguntasSeleccionadas = mutableListOf<Pregunta>()
+
+        // Recorrer áreas aleatoriamente
+        for (area in areas) {
+
+            // Obtener programas del área y aleatorizar su orden
+            val programas = areaRepository
+                .obtenerProgramasPorArea(area.id!!)
+                .shuffled()
+
+            // Recorrer programas aleatoriamente
+            for (programa in programas) {
+
+                // Si ya alcanzamos el total, terminamos
+                if (preguntasSeleccionadas.size >= totalPreguntas) {
+                    break
+                }
+
+                // Obtener TODAS las preguntas del programa
+                // y aleatorizar su orden interno
+                val preguntasPrograma = programaRepository
+                    .obtenerPreguntasPorPrograma(programa.id!!)
+                    .shuffled()
+
+                // Agregar todas las preguntas del programa
+                preguntasSeleccionadas += preguntasPrograma
+            }
+
+            // Si ya alcanzamos el total, no procesamos más áreas
+            if (preguntasSeleccionadas.size >= totalPreguntas) {
+                break
+            }
+        }
+
+        // Validar que se hayan obtenido todas las preguntas
+        if (preguntasSeleccionadas.size != totalPreguntas) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "No fue posible generar el cuestionario completo."
+            )
+        }
+
+        return preguntasSeleccionadas
     }
 
 }
