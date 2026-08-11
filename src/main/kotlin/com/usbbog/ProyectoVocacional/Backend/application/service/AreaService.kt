@@ -150,7 +150,8 @@ class AreaService (private val repository: AreaRepository) {
 
                     ProgramaCatalogoResponse(
                         id = idPrograma,
-                        nombrePrograma = programa.nombrePrograma
+                        nombrePrograma = programa.nombrePrograma,
+                        urlPrograma = programa.urlPrograma
                     )
                 }
             )

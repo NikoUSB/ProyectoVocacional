@@ -5,7 +5,10 @@ import com.usbbog.proyectovocacional.backend.application.dto.response.MensajeRes
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.PasswordResetToken
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.PasswordResetTokenRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.UsuarioRepository
+import com.usbbog.proyectovocacional.backend.infrastructure.config.AppProperties
+import com.usbbog.proyectovocacional.backend.infrastructure.mail.ResetPasswordEmailSender
 import com.usbbog.proyectovocacional.backend.infrastructure.security.password.PasswordService
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -19,9 +22,15 @@ class PasswordResetService(
 
     private val tokenRepository: PasswordResetTokenRepository,
 
-    private val passwordService: PasswordService
+    private val passwordService: PasswordService,
+
+    private val emailSender: ResetPasswordEmailSender,
+
+    private val appProperties: AppProperties
 
 ) {
+
+    private val log = LoggerFactory.getLogger(PasswordResetService::class.java)
 
     fun solicitarRecuperacion(correo: String): MensajeResponse {
 
@@ -35,7 +44,7 @@ class PasswordResetService(
                     "No fue posible generar el token de recuperación."
                 )
 
-            tokenRepository.guardar(
+            val tokenGuardado = tokenRepository.guardar(
                 PasswordResetToken(
                     id = null,
                     idUsuario = idUsuario,
@@ -45,6 +54,27 @@ class PasswordResetService(
                     fechaCreacion = LocalDateTime.now()
                 )
             )
+
+            val enlace = buildString {
+                append(appProperties.frontendUrl)
+                append(appProperties.resetPasswordPath)
+                append("?token=")
+                append(tokenGuardado.token)
+            }
+
+            val nombreCompleto = listOf(usuario.nombre, usuario.apellidos)
+                .filter { !it.isNullOrBlank() }
+                .joinToString(" ")
+
+            try {
+                emailSender.enviar(
+                    destinatario = usuario.correo,
+                    nombreCompleto = nombreCompleto,
+                    enlace = enlace
+                )
+            } catch (e: Exception) {
+                log.error("No fue posible enviar el correo de recuperación a ${usuario.correo}", e)
+            }
         }
 
         return MensajeResponse(

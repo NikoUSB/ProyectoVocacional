@@ -4,7 +4,7 @@ import com.usbbog.proyectovocacional.backend.application.dto.request.auth.Forgot
 import com.usbbog.proyectovocacional.backend.application.dto.request.auth.ResetPasswordRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioCreateRequest
 import com.usbbog.proyectovocacional.backend.application.dto.response.MensajeResponse
-import com.usbbog.proyectovocacional.backend.application.dto.response.usuario.UsuarioResponse
+import com.usbbog.proyectovocacional.backend.application.dto.response.UsuarioResponse
 import com.usbbog.proyectovocacional.backend.application.mapper.UsuarioDtoMapper
 import com.usbbog.proyectovocacional.backend.application.service.PasswordResetService
 import com.usbbog.proyectovocacional.backend.application.service.UsuarioService
@@ -28,7 +28,6 @@ class AuthController(
 
     private val authService: AuthService,
     private val usuarioService: UsuarioService,
-    private val usuarioDtoMapper: UsuarioDtoMapper,
     private val passwordService: PasswordService,
     private val passwordResetService: PasswordResetService
 
@@ -64,11 +63,11 @@ class AuthController(
 
     ): UsuarioResponse {
 
-        return usuarioDtoMapper.toResponse(
+        return UsuarioDtoMapper.toResponse(
 
             usuarioService.guardar(
 
-                usuarioDtoMapper.toDomain(
+                UsuarioDtoMapper.toDomain(
                     request
                 )
 

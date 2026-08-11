@@ -24,6 +24,9 @@ class AreaEntity (
     @Column(name = "path_logo")
     var pathLogo: String?,
 
+    @Column(name = "pacho_path")
+    var pachoPath: String?,
+
     @Column(name = "estado", nullable = false)
     var activo: Boolean = true
 

@@ -11,6 +11,9 @@ class PruebaRepositoryImpl(
     private val jpaRepository: PruebaJpaRepository
 ) : PruebaRepository {
 
+    override fun obtenerTodos(): List<Prueba> =
+        jpaRepository.findAll().map(PruebaMapper::toDomain)
+
     override fun obtenerPorId(id: Long): Prueba? =
         jpaRepository.findById(id).map(PruebaMapper::toDomain).orElse(null)
 

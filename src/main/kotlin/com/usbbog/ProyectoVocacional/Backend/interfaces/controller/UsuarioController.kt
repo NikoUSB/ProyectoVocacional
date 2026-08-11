@@ -3,7 +3,7 @@ package com.usbbog.proyectovocacional.backend.interfaces.controller
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioRolUpdateRequest
 import com.usbbog.proyectovocacional.backend.application.dto.response.PruebaResponse
-import com.usbbog.proyectovocacional.backend.application.dto.response.usuario.UsuarioResponse
+import com.usbbog.proyectovocacional.backend.application.dto.response.UsuarioResponse
 import com.usbbog.proyectovocacional.backend.application.mapper.PruebaDtoMapper
 import com.usbbog.proyectovocacional.backend.application.mapper.UsuarioDtoMapper
 import com.usbbog.proyectovocacional.backend.application.service.PruebaService
@@ -24,8 +24,7 @@ import org.springframework.web.bind.annotation.*
 class UsuarioController(
 
     private val service: UsuarioService,
-    private val pruebaService: PruebaService,
-    private val usuarioDtoMapper: UsuarioDtoMapper
+    private val pruebaService: PruebaService
 
 ) {
 
@@ -37,7 +36,7 @@ class UsuarioController(
     fun obtenerTodos(): List<UsuarioResponse> {
 
         return service.obtenerTodos()
-            .map(usuarioDtoMapper::toResponse)
+            .map(UsuarioDtoMapper::toResponse)
 
     }
 
@@ -53,7 +52,7 @@ class UsuarioController(
 
     ): UsuarioResponse {
 
-        return usuarioDtoMapper.toResponse(
+        return UsuarioDtoMapper.toResponse(
 
             service.obtenerPorId(id)
 
@@ -69,7 +68,7 @@ class UsuarioController(
         @Valid @RequestBody request: UsuarioPerfilUpdateRequest
     ): UsuarioResponse {
 
-        return usuarioDtoMapper.toResponse(
+        return UsuarioDtoMapper.toResponse(
             service.actualizarPerfil(request)
         )
     }
@@ -80,7 +79,7 @@ class UsuarioController(
     )
     fun obtenerPerfilAutenticado(): UsuarioResponse {
 
-        return usuarioDtoMapper.toResponse(
+        return UsuarioDtoMapper.toResponse(
             service.obtenerUsuarioAutenticado()
         )
 
@@ -142,7 +141,7 @@ class UsuarioController(
         @RequestBody
         request: UsuarioRolUpdateRequest
     ): UsuarioResponse {
-        return usuarioDtoMapper.toResponse( service.actualizarRol( id, request.idRol ) )
+        return UsuarioDtoMapper.toResponse( service.actualizarRol( id, request.idRol ) )
     }
 
     @PreAuthorize("hasRole('ROOT') or hasRole('ADMINISTRADOR')")

@@ -6,5 +6,6 @@ data class AfinidadAreaResponse(
     val valorAfinidad: Int,
     val perfil: String? = null,
     val descripcionArea: String? = null,
-    val pathLogo: String? = null
+    val pathLogo: String? = null,
+    val pachoPath: String? = null
 )

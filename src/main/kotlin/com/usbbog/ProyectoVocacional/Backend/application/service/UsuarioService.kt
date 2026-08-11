@@ -71,7 +71,7 @@ class UsuarioService(
             generoOtro = request.generoOtro,
 
             departamento = request.departamento,
-            municipio = request.municipio,
+            ciudad = request.municipio,
 
             semestre = request.semestre
 
