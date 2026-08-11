@@ -1,5 +1,7 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
+import com.usbbog.proyectovocacional.backend.application.dto.response.AreaProgramasResponse
+import com.usbbog.proyectovocacional.backend.application.dto.response.ProgramaCatalogoResponse
 import com.usbbog.proyectovocacional.backend.domain.model.catalogo.Area
 import com.usbbog.proyectovocacional.backend.domain.model.catalogo.Programa
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.AreaRepository
@@ -123,6 +125,36 @@ class AreaService (private val repository: AreaRepository) {
         }
 
         return programas
+    }
+
+    fun obtenerCatalogoProgramas(): List<AreaProgramasResponse> {
+
+        val areas = repository.obtenerTodos()
+
+        return areas.mapNotNull { area ->
+            val id = area.id
+                ?: return@mapNotNull null
+
+            val programas = repository.obtenerProgramasPorArea(id)
+
+            if (programas.isEmpty()) {
+                return@mapNotNull null
+            }
+
+            AreaProgramasResponse(
+                id = id,
+                nombreArea = area.nombreArea,
+                programas = programas.mapNotNull { programa ->
+                    val idPrograma = programa.id
+                        ?: return@mapNotNull null
+
+                    ProgramaCatalogoResponse(
+                        id = idPrograma,
+                        nombrePrograma = programa.nombrePrograma
+                    )
+                }
+            )
+        }
     }
 
 }
