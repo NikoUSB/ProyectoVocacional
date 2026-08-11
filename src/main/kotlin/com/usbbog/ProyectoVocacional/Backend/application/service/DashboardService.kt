@@ -5,6 +5,7 @@ import com.usbbog.proyectovocacional.backend.application.dto.response.DashboardM
 import com.usbbog.proyectovocacional.backend.application.dto.response.DashboardResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.GeographicDistributionResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.RecentResultResponse
+import com.usbbog.proyectovocacional.backend.application.dto.response.TopProgramaResponse
 import com.usbbog.proyectovocacional.backend.domain.model.catalogo.Area
 import com.usbbog.proyectovocacional.backend.domain.model.catalogo.Programa
 import com.usbbog.proyectovocacional.backend.domain.model.catalogo.lugares.Departamento
@@ -181,11 +182,30 @@ class DashboardService(
             ?: usuario.departamento?.let { departamentosPorId[it]?.nombreDepartamento }
             ?: "Sin ciudad"
 
-        val afinidad = afinidadesPorPrueba[reporte.idPrueba]
-            ?.firstOrNull { it.idPrograma == reporte.idPrograma1 }
-            ?.valorAfinidad
-            ?.toInt()
-            ?: 0
+        val afinidadesDeLaPrueba = afinidadesPorPrueba[reporte.idPrueba].orEmpty()
+            .filter { it.idPrograma in listOf(reporte.idPrograma1, reporte.idPrograma2, reporte.idPrograma3) }
+
+        val programasRecomendados = listOf(
+            reporte.idPrograma1 to programasPorId[reporte.idPrograma1],
+            reporte.idPrograma2 to programasPorId[reporte.idPrograma2],
+            reporte.idPrograma3 to programasPorId[reporte.idPrograma3],
+        ).mapNotNull { (idPrograma, programa) ->
+            if (idPrograma == 0L || programa == null) {
+                return@mapNotNull null
+            }
+            val afinidad = afinidadesDeLaPrueba
+                .firstOrNull { it.idPrograma == idPrograma }
+                ?.valorAfinidad
+                ?.toInt()
+                ?: 0
+            TopProgramaResponse(
+                idPrograma = idPrograma,
+                nombrePrograma = programa.nombrePrograma,
+                valorAfinidad = afinidad,
+            )
+        }.sortedByDescending { it.valorAfinidad }
+
+        val top = programasRecomendados.firstOrNull()
 
         return RecentResultResponse(
             id = prueba.id?.toString() ?: reporte.idPrueba.toString(),
@@ -193,8 +213,9 @@ class DashboardService(
             document = usuario.documento,
             city = ciudad,
             primaryArea = areasPorId[reporte.idAreaPredominante]?.nombreArea ?: "Sin área",
-            topCareer = programasPorId[reporte.idPrograma1]?.nombrePrograma ?: "Sin programa",
-            affinity = afinidad,
+            topCareer = top?.nombrePrograma ?: "Sin programa",
+            affinity = top?.valorAfinidad ?: 0,
+            programs = programasRecomendados,
             completedAt = prueba.fecha?.toString() ?: ""
         )
     }

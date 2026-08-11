@@ -37,5 +37,12 @@ data class RecentResultResponse(
     val primaryArea: String,
     val topCareer: String,
     val affinity: Int,
+    val programs: List<TopProgramaResponse>,
     val completedAt: String
+)
+
+data class TopProgramaResponse(
+    val idPrograma: Long,
+    val nombrePrograma: String,
+    val valorAfinidad: Int
 )
