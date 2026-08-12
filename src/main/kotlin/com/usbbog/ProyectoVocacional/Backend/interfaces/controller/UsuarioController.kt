@@ -1,5 +1,6 @@
 package com.usbbog.proyectovocacional.backend.interfaces.controller
 
+import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.PasswordRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioRolUpdateRequest
 import com.usbbog.proyectovocacional.backend.application.dto.response.PruebaResponse
@@ -94,6 +95,28 @@ class UsuarioController(
 
         service.eliminarCuentaPropia()
 
+    }
+
+    @PostMapping("/me/cambio-password")
+    @Operation(
+        summary = "Cambiar contraseña del usuario autenticado."
+    )
+    fun cambioPassword(
+        @Valid @RequestBody request: PasswordRequest
+    ) {
+
+        service.cambiarPassword(request)
+
+    }
+
+    @GetMapping("/me/pruebas")
+    @Operation(
+        summary = "Obtener pruebas del usuario autenticado."
+    )
+    fun obtenerPruebas(): List<PruebaResponse> {
+
+        return pruebaService.obtenerPruebasPropias()
+            .map(PruebaDtoMapper::toResponse)
     }
 
 

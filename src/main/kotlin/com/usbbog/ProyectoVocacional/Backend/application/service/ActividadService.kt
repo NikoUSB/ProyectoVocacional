@@ -8,12 +8,15 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.servlet.HandlerMapping
+
 @Service
 class ActividadService (
     private val repository: ActividadRepository,
     private val rolActividadRepository: RolActividadRepository,
-    private val rolRepository: RolRepository
-
+    private val rolRepository: RolRepository,
+    private val request: HttpServletRequest,
 ) {
 
     fun obtenerTodos(): List<Actividad> {
@@ -21,19 +24,20 @@ class ActividadService (
         val actividades = repository.obtenerTodos()
 
         if (actividades.isEmpty()) {
+
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "No se encontraron áreas."
             )
         }
         return actividades
+
     }
 
     fun obtenerPorId(id: Long): Actividad {
 
         val actividad = repository.obtenerPorId(id)
-            ?:
-            throw ResponseStatusException(
+            ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Actividad con id $id no encontrada."
             )
@@ -83,6 +87,30 @@ class ActividadService (
         }
 
         return actividades
+    }
+
+    fun obtenerActividadActual(): Actividad {
+
+        val metodoHttp = request.method
+
+        val url = request.getAttribute(
+            HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE
+        ) as? String
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No fue posible determinar la ruta de la actividad actual."
+            )
+
+//        println("MÉTODO: $metodoHttp")
+//        println("URL: $url")
+
+        return repository.obtenerPorMetodoYUrl(
+            metodoHttp,
+            url
+        ) ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "No se encontró una actividad para $metodoHttp $url."
+        )
     }
 
 }

@@ -8,5 +8,6 @@ interface ActividadJpaRepository : JpaRepository<ActividadEntity, Long> {
 
     fun findByIdAndActivoTrue(id: Long): Optional<ActividadEntity>
     fun findByActivoTrue(): List<ActividadEntity>
+    fun findByMetodoHttpAndUrlAndActivoTrue(metodoHttp: String, url: String): ActividadEntity?
 
 }

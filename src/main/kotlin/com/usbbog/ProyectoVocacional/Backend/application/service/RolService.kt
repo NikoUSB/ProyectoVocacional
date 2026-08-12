@@ -8,7 +8,10 @@ import org.springframework.web.server.ResponseStatusException
 
 @Service
 class RolService(
-    private val repository: RolRepository
+
+    private val repository: RolRepository,
+    private val logsService: LogsService
+
 ) {
 
     fun obtenerTodos(): List<Rol> {
@@ -42,7 +45,6 @@ class RolService(
         return rol
     }
 
-
     fun guardar(rol: Rol): Rol {
 
         if (rol.id != null) {
@@ -67,6 +69,12 @@ class RolService(
             )
         }
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha modificado el rol ${rol.nombreRol}.",
+            estado = true
+        )
+
         return repository.guardar(rol)
     }
 
@@ -86,6 +94,12 @@ class RolService(
         }
 
         repository.eliminar(id)
+
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha eliminado el rol ${rol.nombreRol}.",
+            estado = true
+        )
     }
 
     fun reactivar(id: Long) {
@@ -104,6 +118,12 @@ class RolService(
         }
 
         repository.reactivar(id)
+
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha reactivado el rol ${rol.nombreRol}.",
+            estado = true
+        )
     }
 
 }

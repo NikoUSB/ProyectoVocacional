@@ -14,8 +14,11 @@ class LogsEntity(
     @Column(name = "id")
     var id: Long? = null,
 
-    @Column(name = "id_usuario_alterado", nullable = false)
-    var idUsuarioAlterado: Long,
+    @Column(name = "id_usuario", nullable = false)
+    var idUsuario: Long,
+
+    @Column(name = "id_usuario_alterado")
+    var idUsuarioAlterado: Long? = null,
 
     @Column(name = "id_actividad", nullable = false)
     var idActividad: Long,
@@ -27,6 +30,6 @@ class LogsEntity(
     var fecha: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "estado", nullable = false)
-    var activo: Boolean = true
+    var estado: Boolean = true
 
 )

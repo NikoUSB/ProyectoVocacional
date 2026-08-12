@@ -4,9 +4,10 @@ import java.time.LocalDateTime
 
 data class Logs (
     val id: Long?,
-    val idUsuarioAlterador: Long,
+    val idUsuario: Long,
+    val idUsuarioAlterado: Long?,
     val idActividad: Long,
     val descripcionLog: String?,
     val fechaLog: LocalDateTime,
-    val activo: Boolean
+    val estado: Boolean
 )

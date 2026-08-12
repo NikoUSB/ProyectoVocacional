@@ -14,4 +14,6 @@ interface ActividadRepository {
 
     fun reactivar(id: Long)
 
+    fun obtenerPorMetodoYUrl(metodoHttp: String, url: String): Actividad?
+
 }

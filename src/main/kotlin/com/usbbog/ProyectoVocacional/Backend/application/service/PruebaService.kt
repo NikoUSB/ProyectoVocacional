@@ -32,7 +32,8 @@ class PruebaService(
     private val reporteRepository: ReporteRepository,
     private val preguntaRepository: PreguntaRepository,
     private val programaRepository: ProgramaRepository,
-    private val areaRepository: AreaRepository
+    private val areaRepository: AreaRepository,
+    private val logsService: LogsService
 
 ) {
 
@@ -189,6 +190,12 @@ class PruebaService(
 
         val url = "/api/v1/pruebas/${prueba.id}/reporte"
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha presentado una prueba.",
+            estado = true
+        )
+
         return ResultadoPruebaResponse(
             idPrueba = prueba.id!!,
             fecha = prueba.fecha,
@@ -212,6 +219,17 @@ class PruebaService(
             nombreReporte = nombreReporte,
             url = url
         )
+    }
+
+    fun obtenerPruebasPropias(): List<Prueba> {
+
+        val usuario = usuarioService.obtenerUsuarioAutenticado()
+
+        val pruebas = pruebaRepository.obtenerPorUsuario(usuario.id!!)
+
+        if (pruebas.isEmpty()) throw ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron pruebas de ${usuario.nombre}.")
+
+        return pruebas
     }
 
     private fun esAdmin(): Boolean =

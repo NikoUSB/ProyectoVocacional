@@ -26,7 +26,9 @@ class PasswordResetService(
 
     private val emailSender: ResetPasswordEmailSender,
 
-    private val appProperties: AppProperties
+    private val appProperties: AppProperties,
+
+    private val logsService: LogsService
 
 ) {
 
@@ -72,8 +74,23 @@ class PasswordResetService(
                     nombreCompleto = nombreCompleto,
                     enlace = enlace
                 )
+
+                logsService.generarLogNoAutenticado(
+                    idUsuario = usuario.id,
+                    usuarioAlterado = null,
+                    descripcion = "ha intentado reestablecer su contraseña.",
+                    estado = true
+                )
+
             } catch (e: Exception) {
                 log.error("No fue posible enviar el correo de recuperación a ${usuario.correo}", e)
+
+                logsService.generarLogNoAutenticado(
+                    idUsuario = usuario.id,
+                    usuarioAlterado = null,
+                    descripcion = "ha intentado reestablecer su contraseña.",
+                    estado = false
+                )
             }
         }
 
@@ -111,6 +128,13 @@ class PasswordResetService(
 
         tokenRepository.guardar(
             token.copy(usado = true)
+        )
+
+        logsService.generarLogNoAutenticado(
+            idUsuario = usuario.id!!,
+            usuarioAlterado = null,
+            descripcion = "ha reestablecido su contraseña",
+            estado = true
         )
 
         return MensajeResponse(
