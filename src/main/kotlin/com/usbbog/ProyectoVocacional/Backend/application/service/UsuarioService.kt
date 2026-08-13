@@ -222,13 +222,7 @@ class UsuarioService(
         validarCorreo(usuario)
         validarNombreUsuario(usuario)
 
-        logsService.generarLog(
-            usuarioAlterado = usuario,
-            descripcion = "ha sido creado.",
-            estado = true,
-        )
-
-        return repository.guardar(
+        val usuarioNuevo = repository.guardar(
             usuario.copy(
                 contrasenaHash = passwordService.encode(usuario.contrasenaHash),
                 activo = true,
@@ -236,6 +230,15 @@ class UsuarioService(
                     LocalDateTime.now()
             )
         )
+
+        logsService.generarLogNoAutenticado(
+            idUsuario = usuarioNuevo.id!!,
+            usuarioAlterado = null,
+            descripcion = "ha sido creado.",
+            estado = true,
+        )
+
+        return usuarioNuevo
 
     }
 
