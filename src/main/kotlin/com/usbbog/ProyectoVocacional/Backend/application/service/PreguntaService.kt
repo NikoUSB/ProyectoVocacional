@@ -12,9 +12,12 @@ import org.springframework.web.server.ResponseStatusException
 
 @Service
 class PreguntaService (
+
     private val repository: PreguntaRepository,
     private val programaRepository: ProgramaRepository,
-    private val areaRepository: AreaRepository
+    private val areaRepository: AreaRepository,
+    private val logsService: LogsService
+
 ) {
 
     fun obtenerTodos(): List<Pregunta> {
@@ -133,6 +136,12 @@ class PreguntaService (
             }
         }
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha actualizado la pregunta ${pregunta.codigo}.",
+            estado = true
+        )
+
         return repository.guardar(pregunta)
     }
 
@@ -151,6 +160,12 @@ class PreguntaService (
             )
         }
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha eliminado la pregunta ${pregunta.codigo}.",
+            estado = true
+        )
+
         repository.eliminar(id)
     }
 
@@ -168,6 +183,12 @@ class PreguntaService (
                 "La Pregunta ya se encuentra activa."
             )
         }
+
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha reactivado la pregunta ${pregunta.codigo}.",
+            estado = true
+        )
 
         repository.reactivar(id)
     }

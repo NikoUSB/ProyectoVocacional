@@ -1,5 +1,6 @@
 package com.usbbog.proyectovocacional.backend.infrastructure.security.auth
 
+import com.usbbog.proyectovocacional.backend.application.service.LogsService
 import com.usbbog.proyectovocacional.backend.infrastructure.security.dto.LoginRequest
 import com.usbbog.proyectovocacional.backend.infrastructure.security.dto.LoginResponse
 import com.usbbog.proyectovocacional.backend.infrastructure.security.jwt.JwtService
@@ -18,6 +19,8 @@ class AuthService(
     private val usuarioRepository: UsuarioRepository,
 
     private val rolRepository: RolRepository,
+
+    private val logsService: LogsService,
 
     private val passwordService: PasswordService,
 
@@ -48,7 +51,7 @@ class AuthService(
 
                 .obtenerUsuarioConRol(request.username)
 
-                ?: throw ResponseStatusException(
+                ?:  throw ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
                     "Credenciales inválidas."
                 )
@@ -60,21 +63,13 @@ class AuthService(
 
         )
 
-//        logger.info("Username = ${usuario}")
-//        logger.info("Username = ${usuario.contrasenaHash}")
-//        logger.info("Username = ${usuario.nombre}")
-//        logger.info("Username = ${usuario.nombreUsuario}")
-//        logger.info("Username = ${request.username}")
-//
-//        logger.info("Password = ${request.password}")
-//
-//        logger.info("Hash = ${usuario.contrasenaHash}")
-//
-//        logger.info("Match = $match")
-
-
         if(!match){
-
+            logsService.generarLogLogin(
+                usuario = usuario,
+                usernameIntentado = request.username,
+                descripcion = "ha intentado inicio de sesión.",
+                estado = false
+            )
             throw ResponseStatusException(
 
                 HttpStatus.UNAUTHORIZED,
@@ -95,6 +90,12 @@ class AuthService(
 
             )
 
+        logsService.generarLogLogin(
+            usuario = usuario,
+            usernameIntentado = request.username,
+            descripcion = "ha intentado inicio de sesión.",
+            estado = true
+        )
 
         return LoginResponse(
 

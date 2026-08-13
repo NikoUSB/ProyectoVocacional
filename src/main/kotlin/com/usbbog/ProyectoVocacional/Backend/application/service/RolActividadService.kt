@@ -1,13 +1,22 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.RolActividad
+import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.ActividadRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.RolActividadRepository
+import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.RolRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class RolActividadService (private val repository: RolActividadRepository) {
+class RolActividadService (
+
+    private val repository: RolActividadRepository,
+    private val actividadRepository: ActividadRepository,
+    private val rolRepository: RolRepository,
+    private val logsService: LogsService
+
+) {
 
     fun obtenerTodos(): List<RolActividad> {
 
@@ -55,6 +64,7 @@ class RolActividadService (private val repository: RolActividadRepository) {
         }
 
         repository.desactivar(id)
+
     }
 
     fun reactivar (id: Long){
@@ -74,14 +84,29 @@ class RolActividadService (private val repository: RolActividadRepository) {
         repository.reactivar(id)
     }
 
-    fun actualizarActividades(
-        idRol: Long,
-        idsActividades: List<Long>
-    ) {
+    fun actualizarActividades(idRol: Long, idsActividades: List<Long>) {
 
         if (idRol.toInt() == 1){
             throw ResponseStatusException(HttpStatus.FORBIDDEN,"No se pueden modificar los permisos de este rol")
         }
+
+        // Validar que todas las actividades existan y sean visibles
+        for (idActividad in idsActividades) {
+
+            val actividad = actividadRepository.obtenerPorId(idActividad)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No existe la actividad con id $idActividad"
+                )
+
+            if (!actividad.visible) {
+                throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La actividad con id $idActividad no puede ser modificada porque no es visible"
+                )
+            }
+        }
+
         val relacionesExistentes = repository.obtenerTodasPorRol(idRol)
 
         // Desactivar las relaciones que ya no fueron seleccionadas
@@ -120,7 +145,12 @@ class RolActividadService (private val repository: RolActividadRepository) {
                 }
             }
         }
-    }
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha actualizado los permisos del rol ${rolRepository.obtenerPorId(idRol)!!.nombreRol}.",
+            estado = true
+        )
+    }
 
 }

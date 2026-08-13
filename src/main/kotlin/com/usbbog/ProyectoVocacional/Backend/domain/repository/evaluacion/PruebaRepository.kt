@@ -3,6 +3,7 @@ package com.usbbog.proyectovocacional.backend.domain.repository.evaluacion
 import com.usbbog.proyectovocacional.backend.domain.model.evaluacion.Prueba
 
 interface PruebaRepository {
+    fun obtenerTodos(): List<Prueba>
     fun obtenerPorId(id: Long): Prueba?
     fun obtenerPruebaActivaPorUsuario(idUsuario: Long): Prueba?
     fun obtenerPorUsuario(idUsuario: Long): List<Prueba>

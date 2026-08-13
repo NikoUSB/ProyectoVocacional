@@ -9,8 +9,12 @@ import org.springframework.web.server.ResponseStatusException
 
 @Service
 class ProgramaService (
-    private val repository: ProgramaRepository
+
+    private val repository: ProgramaRepository,
+    private val logsService: LogsService
+
 ) {
+
     fun obtenerTodos(): List<Programa> {
 
         val programas = repository.obtenerTodos()
@@ -61,6 +65,12 @@ class ProgramaService (
             }
         }
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha actualizado el programa ${programa.nombrePrograma}.",
+            estado = true
+        )
+
         return repository.guardar(programa)
     }
 
@@ -79,6 +89,12 @@ class ProgramaService (
             )
         }
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha eliminado el programa ${programa.nombrePrograma}",
+            estado = true
+        )
+
         repository.eliminar(id)
     }
 
@@ -96,6 +112,12 @@ class ProgramaService (
                 "El Programa ya se encuentra activo."
             )
         }
+
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha reactivado el programa ${programa.nombrePrograma}",
+            estado = true
+        )
 
         repository.reactivar(id)
     }

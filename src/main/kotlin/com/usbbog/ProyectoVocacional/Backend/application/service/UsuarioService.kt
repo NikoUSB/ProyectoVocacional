@@ -1,5 +1,6 @@
 package com.usbbog.proyectovocacional.backend.application.service
 
+import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.PasswordRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.Usuario
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.ProgramaRepository
@@ -16,32 +17,19 @@ import java.time.LocalDateTime
 class UsuarioService(
 
     private val repository: UsuarioRepository,
-
     private val rolRepository: RolRepository,
-
     private val programaRepository: ProgramaRepository,
-
-    private val passwordService: PasswordService
+    private val usuarioAutenticadoService: UsuarioAutenticadoService,
+    private val passwordService: PasswordService,
+    private val logsService: LogsService
 
 ) {
 
     fun obtenerUsuarioAutenticado(): Usuario {
-
-        val authentication =
-            SecurityContextHolder
-                .getContext()
-                .authentication
-                ?: throw ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "No hay un usuario autenticado."
-                )
-
-        val username = authentication.name
-
-        return repository.obtenerPorNombreUsuario(username)
+        return usuarioAutenticadoService.obtenerUsuarioAutenticado()
             ?: throw ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Usuario autenticado no encontrado."
+                HttpStatus.NOT_FOUND,
+                "Usuario logueado no encontrado."
             )
     }
 
@@ -71,10 +59,16 @@ class UsuarioService(
             generoOtro = request.generoOtro,
 
             departamento = request.departamento,
-            municipio = request.municipio,
+            ciudad = request.municipio,
 
             semestre = request.semestre
 
+        )
+
+        logsService.generarLog(
+            usuarioAlterado = usuario,
+            descripcion = "ha actualizado su perfil.",
+            estado = true
         )
 
         return repository.guardar(actualizado)
@@ -105,12 +99,15 @@ class UsuarioService(
             )
 
         repository.desactivar(id)
+
+        logsService.generarLog(
+            usuarioAlterado = usuario,
+            descripcion = "ha desactivado su cuenta.",
+            estado = true
+        )
     }
 
-    fun actualizarRol(
-        id: Long,
-        idRol: Long
-    ): Usuario {
+    fun actualizarRol(id: Long, idRol: Long): Usuario {
 
         val usuario = repository.obtenerPorId(id)
             ?: throw ResponseStatusException(
@@ -127,11 +124,49 @@ class UsuarioService(
 
         validarRol(idRol)
 
+        logsService.generarLog(
+            usuarioAlterado =  usuario,
+            descripcion = "ha actualizado el rol del usuario ${usuario.nombreUsuario}.",
+            estado = true
+        )
+
         return repository.guardar(
             usuario.copy(
                 idRol = idRol
             )
         )
+    }
+
+    fun cambiarPassword(request: PasswordRequest) {
+
+        val usuario = obtenerUsuarioAutenticado()
+
+        if (!passwordService.matches(request.passwordActual, usuario.contrasenaHash)) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "La contraseña actual no es correcta."
+            )
+        }
+
+        if (request.passwordActual == request.passwordNueva) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "La nueva contraseña debe ser diferente a la actual."
+            )
+        }
+
+        logsService.generarLog(
+            usuarioAlterado = usuario,
+            descripcion = "ha cambiado su contraseña",
+            estado = true
+        )
+
+        repository.guardar(
+            usuario.copy(
+                contrasenaHash = passwordService.encode(request.passwordNueva)
+            )
+        )
+
     }
 
     fun obtenerTodos():List<Usuario>{
@@ -156,7 +191,6 @@ class UsuarioService(
 
     }
 
-
     fun obtenerPorId(id:Long):Usuario{
 
         val usuario = repository.obtenerPorId(id)
@@ -180,16 +214,20 @@ class UsuarioService(
 
     }
 
-
-    fun guardar(
-        usuario:Usuario
-    ):Usuario{
+    fun guardar(usuario:Usuario):Usuario{
 
         validarRol(usuario.idRol)
         validarPrograma(usuario.idPrograma)
         validarDocumento(usuario)
         validarCorreo(usuario)
         validarNombreUsuario(usuario)
+
+        logsService.generarLog(
+            usuarioAlterado = usuario,
+            descripcion = "ha sido creado.",
+            estado = true,
+        )
+
         return repository.guardar(
             usuario.copy(
                 contrasenaHash = passwordService.encode(usuario.contrasenaHash),
@@ -201,10 +239,7 @@ class UsuarioService(
 
     }
 
-
-    fun eliminar(
-        id:Long
-    ){
+    fun eliminar(id:Long){
 
 
         val usuario =
@@ -232,16 +267,17 @@ class UsuarioService(
 
         }
 
+        logsService.generarLog(
+            usuarioAlterado = usuario,
+            descripcion = "ha eliminado al usuario ${usuario.nombreUsuario}.",
+            estado = true
+        )
 
         repository.desactivar(id)
 
     }
 
-    fun reactivar(
-
-        id:Long
-
-    ){
+    fun reactivar(id:Long){
 
         val usuario = repository.obtenerPorId(id)
 
@@ -266,6 +302,11 @@ class UsuarioService(
 
         }
 
+        logsService.generarLog(
+            usuarioAlterado = usuario,
+            descripcion = "ha reactivado al usuario ${usuario.nombreUsuario}.",
+            estado = true
+        )
 
         repository.reactivar(
             id
@@ -273,10 +314,8 @@ class UsuarioService(
 
     }
 
-
-    private fun validarRol(
-        idRol: Long
-    ) {
+    //Validaciones
+    private fun validarRol(idRol: Long) {
 
         rolRepository.obtenerPorId(idRol)
             ?: throw ResponseStatusException(
@@ -285,9 +324,7 @@ class UsuarioService(
             )
     }
 
-    private fun validarPrograma(
-        idPrograma: Long?
-    ) {
+    private fun validarPrograma(idPrograma: Long?) {
 
         if (idPrograma == null) {
             return
@@ -300,11 +337,7 @@ class UsuarioService(
             )
     }
 
-
-
-    private fun validarDocumento(
-        usuario:Usuario
-    ){
+    private fun validarDocumento(usuario:Usuario){
 
         if(
 
@@ -329,13 +362,7 @@ class UsuarioService(
 
     }
 
-
-
-    private fun validarCorreo(
-
-        usuario:Usuario
-
-    ){
+    private fun validarCorreo(usuario:Usuario){
 
         val usuarioEncontrado =
 
@@ -364,7 +391,6 @@ class UsuarioService(
         }
 
     }
-
 
     private fun validarNombreUsuario(usuario: Usuario) {
 

@@ -14,6 +14,7 @@ object AreaDtoMapper {
             perfilPredonimante = request.perfilPredonimante,
             descripcionArea = request.descripcionArea,
             pathLogo = request.pathLogo,
+            pachoPath = request.pachoPath,
             activo = true
         )
 
@@ -27,6 +28,7 @@ object AreaDtoMapper {
             perfilPredonimante = request.perfilPredonimante,
             descripcionArea = request.descripcionArea,
             pathLogo = request.pathLogo,
+            pachoPath = request.pachoPath,
             activo = true
         )
 
@@ -39,7 +41,8 @@ object AreaDtoMapper {
             nombreArea = domain.nombreArea,
             perfilPredonimante = domain.perfilPredonimante,
             descripcionArea = domain.descripcionArea,
-            pathLogo = domain.pathLogo
+            pathLogo = domain.pathLogo,
+            pachoPath = domain.pachoPath
         )
 
     }

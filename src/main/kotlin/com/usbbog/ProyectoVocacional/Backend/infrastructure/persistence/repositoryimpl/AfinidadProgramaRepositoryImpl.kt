@@ -11,6 +11,9 @@ class AfinidadProgramaRepositoryImpl(
     private val jpaRepository: AfinidadProgramaJpaRepository
 ) : AfinidadProgramaRepository {
 
+    override fun obtenerTodos(): List<AfinidadPrograma> =
+        jpaRepository.findAll().map(AfinidadProgramaMapper::toDomain)
+
     override fun guardarTodos(lista: List<AfinidadPrograma>): List<AfinidadPrograma> =
         jpaRepository.saveAll(lista.map(AfinidadProgramaMapper::toEntity))
             .map(AfinidadProgramaMapper::toDomain)

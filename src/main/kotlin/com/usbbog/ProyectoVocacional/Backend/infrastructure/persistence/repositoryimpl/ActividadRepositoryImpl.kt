@@ -47,4 +47,9 @@ class ActividadRepositoryImpl  (
         jpaRepository.save(entity)
     }
 
+    override fun obtenerPorMetodoYUrl(metodoHttp: String, url: String): Actividad? =
+        jpaRepository
+            .findByMetodoHttpAndUrlAndActivoTrue(metodoHttp, url)
+            ?.let(ActividadMapper::toDomain)
+
 }

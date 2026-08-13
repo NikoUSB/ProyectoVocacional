@@ -13,6 +13,7 @@ object AreaMapper {
             perfilPredonimante = entity.perfilPredonimante,
             descripcionArea = entity.descripcionArea,
             pathLogo  = entity.pathLogo,
+            pachoPath = entity.pachoPath,
             activo = entity.activo
         )
 
@@ -26,6 +27,7 @@ object AreaMapper {
             perfilPredonimante = domain.perfilPredonimante,
             descripcionArea = domain.descripcionArea,
             pathLogo = domain.pathLogo,
+            pachoPath = domain.pachoPath,
             activo = domain.activo
 
         )

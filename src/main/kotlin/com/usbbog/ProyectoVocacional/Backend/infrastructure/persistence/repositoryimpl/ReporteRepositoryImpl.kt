@@ -11,6 +11,9 @@ class ReporteRepositoryImpl(
     private val jpaRepository: ReporteJpaRepository
 ) : ReporteRepository {
 
+    override fun obtenerTodos(): List<Reporte> =
+        jpaRepository.findAll().map(ReporteMapper::toDomain)
+
     override fun guardar(reporte: Reporte): Reporte =
         ReporteMapper.toDomain(jpaRepository.save(ReporteMapper.toEntity(reporte)))
 

@@ -10,7 +10,12 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class AreaService (private val repository: AreaRepository) {
+class AreaService (
+
+    private val repository: AreaRepository,
+    private val logsService: LogsService
+
+) {
     fun obtenerTodos(): List<Area> {
 
         val areas = repository.obtenerTodos()
@@ -24,7 +29,6 @@ class AreaService (private val repository: AreaRepository) {
 
         return areas
     }
-
 
     fun obtenerPorId(id: Long): Area {
 
@@ -61,6 +65,12 @@ class AreaService (private val repository: AreaRepository) {
             }
         }
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha actualizado el área ${area.nombreArea}.",
+            estado = true
+        )
+
         return repository.guardar(area)
     }
 
@@ -79,6 +89,12 @@ class AreaService (private val repository: AreaRepository) {
             )
         }
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha eliminado el área ${area.nombreArea}.",
+            estado = true
+        )
+
         repository.eliminar(id)
     }
 
@@ -96,6 +112,12 @@ class AreaService (private val repository: AreaRepository) {
                 "El área ya se encuentra activa."
             )
         }
+
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha reactivado el área ${area.nombreArea}.",
+            estado = true
+        )
 
         repository.reactivar(id)
     }
@@ -150,7 +172,8 @@ class AreaService (private val repository: AreaRepository) {
 
                     ProgramaCatalogoResponse(
                         id = idPrograma,
-                        nombrePrograma = programa.nombrePrograma
+                        nombrePrograma = programa.nombrePrograma,
+                        urlPrograma = programa.urlPrograma
                     )
                 }
             )
