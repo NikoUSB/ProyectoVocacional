@@ -333,11 +333,19 @@ class UsuarioService(
             return
         }
 
-        programaRepository.obtenerPorId(idPrograma)
+        val programa = programaRepository.obtenerPorId(idPrograma)
             ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "El programa seleccionado no existe."
             )
+
+        if (programa.urlPrograma.isNullOrBlank()) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "El programa seleccionado no hace parte de la ogerta de la Universidad de San Buenaventura."
+            )
+        }
+
     }
 
     private fun validarDocumento(usuario:Usuario){
