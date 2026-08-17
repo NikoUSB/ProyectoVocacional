@@ -8,22 +8,24 @@ object LogsMapper {
     fun toDomain(entity: LogsEntity): Logs {
         return Logs(
             id = entity.id,
-            idUsuarioAlterador = entity.idUsuarioAlterado,
+            idUsuario = entity.idUsuario,
+            idUsuarioAlterado = entity.idUsuarioAlterado,
             idActividad = entity.idActividad,
             descripcionLog = entity.descripcion,
             fechaLog = entity.fecha,
-            activo = entity.activo
+            estado = entity.estado
         )
     }
 
     fun toEntity(model: Logs): LogsEntity {
         return LogsEntity(
             id = model.id,
-            idUsuarioAlterado = model.idUsuarioAlterador,
+            idUsuario = model.idUsuario,
+            idUsuarioAlterado = model.idUsuarioAlterado,
             idActividad = model.idActividad,
             descripcion = model.descripcionLog,
             fecha = model.fechaLog,
-            activo = model.activo
+            estado = model.estado
         )
     }
 }

@@ -16,15 +16,9 @@ import java.util.UUID
 
 @Service
 class AreaService (
-<<<<<<< HEAD
-
     private val repository: AreaRepository,
-    private val logsService: LogsService
-
-=======
-    private val repository: AreaRepository,
+    private val logsService: LogsService,
     private val appProperties: AppProperties
->>>>>>> acd44fe (feat: implementar requerimientos v2 - password, logs, filtros, pacho upload, email masking)
 ) {
     fun obtenerTodos(): List<Area> {
 
@@ -40,14 +34,10 @@ class AreaService (
         return areas
     }
 
-<<<<<<< HEAD
-=======
     fun obtenerTodosIncluyendoInactivos(): List<Area> {
         return repository.obtenerTodosIncluyendoInactivos()
     }
 
-
->>>>>>> acd44fe (feat: implementar requerimientos v2 - password, logs, filtros, pacho upload, email masking)
     fun obtenerPorId(id: Long): Area {
 
         val area = repository.obtenerPorId(id)
