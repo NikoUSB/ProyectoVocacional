@@ -5,5 +5,6 @@ data class ProgramaResponse (
     val nombrePrograma: String,
     val descripcionPrograma: String?,
     val urlPrograma: String?,
-    val idArea: Long
+    val idArea: Long,
+    val activo: Boolean
 )

@@ -7,6 +7,8 @@ interface AreaRepository {
 
     fun obtenerTodos(): List<Area>
 
+    fun obtenerTodosIncluyendoInactivos(): List<Area>
+
     fun obtenerPorId(id: Long): Area?
 
     fun guardar(area: Area): Area

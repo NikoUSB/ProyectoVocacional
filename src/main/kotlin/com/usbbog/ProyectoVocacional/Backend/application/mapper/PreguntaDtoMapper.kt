@@ -35,8 +35,8 @@ object PreguntaDtoMapper {
             id = domain.id,
             codigo = domain.codigo,
             idPrograma = domain.idPrograma,
-            enunciado = domain.enunciado
+            enunciado = domain.enunciado,
+            activo = domain.activo
         )
-
     }
 }

@@ -5,16 +5,26 @@ import com.usbbog.proyectovocacional.backend.application.dto.response.ProgramaCa
 import com.usbbog.proyectovocacional.backend.domain.model.catalogo.Area
 import com.usbbog.proyectovocacional.backend.domain.model.catalogo.Programa
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.AreaRepository
+import com.usbbog.proyectovocacional.backend.infrastructure.config.AppProperties
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.UUID
 
 @Service
 class AreaService (
+<<<<<<< HEAD
 
     private val repository: AreaRepository,
     private val logsService: LogsService
 
+=======
+    private val repository: AreaRepository,
+    private val appProperties: AppProperties
+>>>>>>> acd44fe (feat: implementar requerimientos v2 - password, logs, filtros, pacho upload, email masking)
 ) {
     fun obtenerTodos(): List<Area> {
 
@@ -30,6 +40,14 @@ class AreaService (
         return areas
     }
 
+<<<<<<< HEAD
+=======
+    fun obtenerTodosIncluyendoInactivos(): List<Area> {
+        return repository.obtenerTodosIncluyendoInactivos()
+    }
+
+
+>>>>>>> acd44fe (feat: implementar requerimientos v2 - password, logs, filtros, pacho upload, email masking)
     fun obtenerPorId(id: Long): Area {
 
         val area = repository.obtenerPorId(id)
@@ -178,6 +196,43 @@ class AreaService (
                 }
             )
         }
+    }
+
+    fun guardarPacho(id: Long, file: MultipartFile): String {
+        val area = repository.obtenerPorId(id)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Área con id $id no encontrada."
+            )
+
+        if (file.isEmpty) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "El archivo no puede estar vacío."
+            )
+        }
+
+        val allowedTypes = setOf("image/jpeg", "image/png", "image/webp")
+        if (file.contentType !in allowedTypes) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Solo se permiten archivos JPEG, PNG o WEBP."
+            )
+        }
+
+        val uploadDir = Paths.get(appProperties.uploadDir)
+        Files.createDirectories(uploadDir)
+
+        val extension = file.originalFilename?.substringAfterLast('.', "jpg") ?: "jpg"
+        val filename = "pacho-${id}-${UUID.randomUUID()}.$extension"
+
+        val targetPath = uploadDir.resolve(filename)
+        file.bytes.let { Files.write(targetPath, it) }
+
+        val updatedArea = area.copy(pachoPath = filename)
+        repository.guardar(updatedArea)
+
+        return filename
     }
 
 }

@@ -15,6 +15,10 @@ class PreguntaRepositoryImpl(private val jpaRepository: PreguntaJpaRepository) :
         jpaRepository.findByActivoTrue()
             .map(PreguntaMapper::toDomain)
 
+    override fun obtenerTodosIncluyendoInactivos(): List<Pregunta> =
+        jpaRepository.findAll()
+            .map(PreguntaMapper::toDomain)
+
     override fun obtenerPorId(id: Long): Pregunta? =
         jpaRepository.findById(id)
             .map(PreguntaMapper::toDomain)

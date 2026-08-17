@@ -3,6 +3,7 @@ package com.usbbog.proyectovocacional.backend.interfaces.controller
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.PasswordRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioRolUpdateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.response.MensajeResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.PruebaResponse
 import com.usbbog.proyectovocacional.backend.application.dto.response.UsuarioResponse
 import com.usbbog.proyectovocacional.backend.application.mapper.PruebaDtoMapper
@@ -175,6 +176,31 @@ class UsuarioController(
 
         return pruebaService.obtenerPruebasDeUsuario(id)
             .map(PruebaDtoMapper::toResponse)
+
+    }
+
+    @Operation(
+        summary = "Cambiar la contraseña del usuario autenticado."
+    )
+    @PostMapping("/me/cambiar-contrasena")
+    fun cambiarContrasena(
+        @Valid @RequestBody request: PasswordRequest
+    ): MensajeResponse {
+
+        return service.cambiarContrasena(request)
+
+    }
+
+    @PreAuthorize("hasRole('ROOT')")
+    @Operation(
+        summary = "Restablecer la contraseña de un usuario (solo ROOT)."
+    )
+    @PostMapping("/{id}/restablecer-contrasena")
+    fun restablecerContrasenaDeAdmin(
+        @PathVariable id: Long
+    ): MensajeResponse {
+
+        return service.restablecerContrasenaDeAdmin(id)
 
     }
 

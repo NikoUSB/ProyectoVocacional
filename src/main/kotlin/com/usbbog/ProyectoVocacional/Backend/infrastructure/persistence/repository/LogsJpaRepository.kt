@@ -3,8 +3,10 @@ package com.usbbog.proyectovocacional.backend.infrastructure.persistence.reposit
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.entity.seguridad.LogsEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface LogsJpaRepository: JpaRepository<LogsEntity, Long> {
+interface LogsJpaRepository : JpaRepository<LogsEntity, Long> {
 
-    //fun findBy
+    fun findAllByOrderByFechaDesc(): List<LogsEntity>
+
+    fun findAllByIdUsuarioAlteradoOrderByFechaDesc(idUsuarioAlterado: Long): List<LogsEntity>
 
 }

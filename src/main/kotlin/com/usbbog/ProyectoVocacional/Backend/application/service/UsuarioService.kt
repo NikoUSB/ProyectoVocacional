@@ -2,6 +2,7 @@ package com.usbbog.proyectovocacional.backend.application.service
 
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.PasswordRequest
 import com.usbbog.proyectovocacional.backend.application.dto.request.usuario.UsuarioPerfilUpdateRequest
+import com.usbbog.proyectovocacional.backend.application.dto.response.MensajeResponse
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.Usuario
 import com.usbbog.proyectovocacional.backend.domain.repository.catalogo.ProgramaRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.RolRepository
@@ -12,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
 class UsuarioService(
@@ -317,8 +319,80 @@ class UsuarioService(
 
     }
 
+<<<<<<< HEAD
     //Validaciones
     private fun validarRol(idRol: Long) {
+=======
+    fun cambiarContrasena(request: PasswordRequest): MensajeResponse {
+
+        val usuario = obtenerUsuarioAutenticado()
+
+        if (!usuario.activo) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Usuario inactivo."
+            )
+        }
+
+        if (!passwordService.matches(request.passwordActual, usuario.contrasenaHash)) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "La contraseña actual es incorrecta."
+            )
+        }
+
+        repository.guardar(
+            usuario.copy(
+                contrasenaHash = passwordService.encode(request.passwordNueva)
+            )
+        )
+
+        return MensajeResponse("Contraseña cambiada exitosamente.")
+    }
+
+    fun restablecerContrasenaDeAdmin(idUsuario: Long): MensajeResponse {
+
+        val usuario = repository.obtenerPorId(idUsuario)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Usuario con id $idUsuario no encontrado."
+            )
+
+        if (!usuario.activo) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No se puede restablecer la contraseña de un usuario inactivo."
+            )
+        }
+
+        val contrasenaTemporal = generarContrasenaTemporal(12)
+
+        repository.guardar(
+            usuario.copy(
+                contrasenaHash = passwordService.encode(contrasenaTemporal)
+            )
+        )
+
+        return MensajeResponse(
+            "La contraseña del usuario ${usuario.nombre} ${usuario.apellidos} fue restablecida. " +
+            "Contraseña temporal: $contrasenaTemporal"
+        )
+    }
+
+    private fun generarContrasenaTemporal(longitud: Int): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%"
+        return buildString {
+            repeat(longitud) {
+                append(chars.random())
+            }
+        }
+    }
+
+
+    private fun validarRol(
+        idRol: Long
+    ) {
+>>>>>>> acd44fe (feat: implementar requerimientos v2 - password, logs, filtros, pacho upload, email masking)
 
         rolRepository.obtenerPorId(idRol)
             ?: throw ResponseStatusException(

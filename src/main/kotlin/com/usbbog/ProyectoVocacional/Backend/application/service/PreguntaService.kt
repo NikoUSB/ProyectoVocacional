@@ -34,6 +34,10 @@ class PreguntaService (
         return programas
     }
 
+    fun obtenerTodosIncluyendoInactivos(): List<Pregunta> {
+        return repository.obtenerTodosIncluyendoInactivos()
+    }
+
     fun obtenerParaPrueba(porArea: Int?): List<PreguntaPruebaResponse> {
 
         val programas = programaRepository.obtenerTodos()

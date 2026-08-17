@@ -2,26 +2,26 @@ package com.usbbog.proyectovocacional.backend.infrastructure.persistence.reposit
 
 import com.usbbog.proyectovocacional.backend.domain.model.seguridad.Logs
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.LogsRepository
-import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.seguridad.LogMapper
+import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.seguridad.LogsMapper
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.repository.LogsJpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-class LogsRepositoryImpl (
+class LogsRepositoryImpl(
     private val jpaRepository: LogsJpaRepository
-): LogsRepository {
+) : LogsRepository {
 
     override fun obtenerTodos(): List<Logs> =
-        jpaRepository.findAll()
-            .map(LogMapper::toDomain)
+        jpaRepository.findAllByOrderByFechaDesc()
+            .map(LogsMapper::toDomain)
 
-    override fun guardar(logs: Logs): Logs {
+    override fun obtenerPorUsuario(idUsuario: Long): List<Logs> =
+        jpaRepository.findAllByIdUsuarioAlteradoOrderByFechaDesc(idUsuario)
+            .map(LogsMapper::toDomain)
 
-        val entity = LogMapper.toEntity(logs)
-
-        return LogMapper.toDomain(
-            jpaRepository.save(entity)
+    override fun guardar(log: Logs): Logs =
+        LogsMapper.toDomain(
+            jpaRepository.save(LogsMapper.toEntity(log))
         )
-    }
 
 }

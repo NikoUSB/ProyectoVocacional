@@ -20,6 +20,10 @@ class ProgramaRepositoryImpl (
         jpaRepository.findByActivoTrue()
             .map(ProgramaMapper::toDomain)
 
+    override fun obtenerTodosIncluyendoInactivos(): List<Programa> =
+        jpaRepository.findAll()
+            .map(ProgramaMapper::toDomain)
+
     override fun obtenerPorId(id: Long): Programa? =
         jpaRepository.findById(id)
             .map(ProgramaMapper::toDomain)
