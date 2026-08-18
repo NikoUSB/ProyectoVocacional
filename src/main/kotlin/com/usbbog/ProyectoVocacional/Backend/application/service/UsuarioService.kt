@@ -213,27 +213,18 @@ class UsuarioService(
             )
         }
 
-        val contrasenaTemporal = generarContrasenaTemporal(12)
+        val nuevaContrasena = usuario.documento
 
         repository.guardar(
             usuario.copy(
-                contrasenaHash = passwordService.encode(contrasenaTemporal)
+                contrasenaHash = passwordService.encode(nuevaContrasena)
             )
         )
 
         return MensajeResponse(
             "La contraseña del usuario ${usuario.nombre} ${usuario.apellidos} fue restablecida. " +
-            "Contraseña temporal: $contrasenaTemporal"
+            "Nueva contraseña: $nuevaContrasena"
         )
-    }
-
-    private fun generarContrasenaTemporal(longitud: Int): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%"
-        return buildString {
-            repeat(longitud) {
-                append(chars.random())
-            }
-        }
     }
 
     fun obtenerTodos():List<Usuario>{

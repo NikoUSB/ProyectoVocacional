@@ -7,6 +7,7 @@ import com.usbbog.proyectovocacional.backend.domain.model.seguridad.UsuarioLogin
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.ActividadRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.LogsRepository
 import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.UsuarioRepository
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -20,6 +21,8 @@ class LogsService(
     private val actividadService: ActividadService,
     private val usuarioAutenticadoService: UsuarioAutenticadoService
 ) {
+
+    private val logger = LoggerFactory.getLogger(LogsService::class.java)
 
     fun obtenerTodos(): List<LogsResponse> {
         return repository.obtenerTodos().map { log ->
@@ -53,22 +56,36 @@ class LogsService(
         }
     }
 
+    private fun intentarObtenerActividad(): Long? {
+        return try {
+            val actividad = actividadService.obtenerActividadActual()
+            actividad.id
+        } catch (ex: ResponseStatusException) {
+            logger.warn("No se encontró actividad para registrar log: ${ex.reason}")
+            null
+        }
+    }
+
     fun generarLog(
         usuarioAlterado: Usuario?,
         descripcion: String,
         estado: Boolean
-    ): Logs {
+    ): Logs? {
+
+        val actividadId = intentarObtenerActividad()
+        if (actividadId == null) {
+            logger.warn("No se registró log: no se encontró actividad para la solicitud actual.")
+            return null
+        }
 
         val usuario = usuarioAutenticadoService.obtenerUsuarioAutenticado()
-
-        val actividad = actividadService.obtenerActividadActual()
 
         val log = Logs(
             id = null,
             idUsuario = usuario?.id ?: usuarioAlterado?.id
             ?: throw IllegalStateException("No se pudo obtener el id del usuario"),
             idUsuarioAlterado = usuarioAlterado?.id,
-            idActividad = actividad.id!!,
+            idActividad = actividadId,
             descripcionLog = descripcion,
             fechaLog = LocalDateTime.now(),
             estado = estado
@@ -82,15 +99,19 @@ class LogsService(
         usernameIntentado: String,
         descripcion: String,
         estado: Boolean
-    ): Logs {
+    ): Logs? {
 
-        val actividad = actividadService.obtenerActividadActual()
+        val actividadId = intentarObtenerActividad()
+        if (actividadId == null) {
+            logger.warn("No se registró log de login: no se encontró actividad para la solicitud actual.")
+            return null
+        }
 
         val log = Logs(
             id = null,
             idUsuario = usuario?.id ?: 0,
             idUsuarioAlterado = null,
-            idActividad = actividad.id!!,
+            idActividad = actividadId,
             descripcionLog = descripcion,
             fechaLog = LocalDateTime.now(),
             estado = estado
@@ -104,15 +125,19 @@ class LogsService(
         usuarioAlterado: Usuario?,
         descripcion: String,
         estado: Boolean
-    ): Logs {
+    ): Logs? {
 
-        val actividad = actividadService.obtenerActividadActual()
+        val actividadId = intentarObtenerActividad()
+        if (actividadId == null) {
+            logger.warn("No se registró log (no autenticado): no se encontró actividad para la solicitud actual.")
+            return null
+        }
 
         val log = Logs(
             id = null,
             idUsuario = idUsuario,
             idUsuarioAlterado = usuarioAlterado?.id,
-            idActividad = actividad.id!!,
+            idActividad = actividadId,
             descripcionLog = descripcion,
             fechaLog = LocalDateTime.now(),
             estado = estado
