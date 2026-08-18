@@ -195,6 +195,12 @@ class UsuarioService(
             )
         )
 
+        logsService.generarLog(
+            usuarioAlterado = usuario,
+            descripcion = "ha cambiado su contraseña",
+            estado = true
+        )
+
         return MensajeResponse("Contraseña cambiada exitosamente.")
     }
 
@@ -219,6 +225,12 @@ class UsuarioService(
             usuario.copy(
                 contrasenaHash = passwordService.encode(nuevaContrasena)
             )
+        )
+
+        logsService.generarLog(
+            usuarioAlterado = usuario,
+            descripcion = "ha restablecido la contraseña del usuario ${usuario.nombre} ${usuario.apellidos}",
+            estado = true
         )
 
         return MensajeResponse(

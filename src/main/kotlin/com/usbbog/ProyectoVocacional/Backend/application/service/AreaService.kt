@@ -222,6 +222,12 @@ class AreaService (
         val updatedArea = area.copy(pachoPath = filename)
         repository.guardar(updatedArea)
 
+        logsService.generarLog(
+            usuarioAlterado = null,
+            descripcion = "ha actualizado la imagen de Pacho del área ${area.nombreArea}",
+            estado = true
+        )
+
         return filename
     }
 
