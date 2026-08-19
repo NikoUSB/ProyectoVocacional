@@ -21,6 +21,10 @@ class AreaRepositoryImpl(
         jpaRepository.findByActivoTrue()
             .map(AreaMapper::toDomain)
 
+    override fun obtenerTodosIncluyendoInactivos(): List<Area> =
+        jpaRepository.findAll()
+            .map(AreaMapper::toDomain)
+
     override fun obtenerPorId(id: Long): Area? =
         jpaRepository.findById(id)
             .map(AreaMapper::toDomain)

@@ -41,7 +41,8 @@ object ProgramaDtoMapper {
             nombrePrograma = domain.nombrePrograma,
             descripcionPrograma = domain.descripcionPrograma,
             urlPrograma = domain.urlPrograma,
-            idArea = domain.idArea
+            idArea = domain.idArea,
+            activo = domain.activo
         )
 
     }

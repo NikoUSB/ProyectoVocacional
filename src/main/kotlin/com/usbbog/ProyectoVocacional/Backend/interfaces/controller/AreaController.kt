@@ -8,6 +8,7 @@ import com.usbbog.proyectovocacional.backend.application.mapper.ProgramaDtoMappe
 import com.usbbog.proyectovocacional.backend.application.service.AreaService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 @Tag(
     name = "Areas",
@@ -34,7 +36,7 @@ class AreaController (
     @GetMapping
     fun obtenerTodos(): List<AreaResponse> {
 
-        return areaService.obtenerTodos()
+        return areaService.obtenerTodosIncluyendoInactivos()
             .map(AreaDtoMapper::toResponse)
 
     }
@@ -104,6 +106,19 @@ class AreaController (
             .map(ProgramaDtoMapper::toResponse)
 
         return programas
+    }
+
+    @PostMapping("/{id}/imagen-pacho", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun subirPacho(
+        @PathVariable id: Long,
+        @RequestBody file: MultipartFile
+    ): AreaResponse {
+
+        areaService.guardarPacho(id, file)
+
+        val area = areaService.obtenerPorId(id)
+
+        return AreaDtoMapper.toResponse(area)
     }
 
 

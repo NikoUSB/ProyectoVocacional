@@ -6,6 +6,8 @@ interface LogsRepository {
 
     fun obtenerTodos(): List<Logs>
 
-    fun guardar(Logs: Logs): Logs
+    fun obtenerPorUsuario(idUsuario: Long): List<Logs>
+
+    fun guardar(logs: Logs): Logs
 
 }

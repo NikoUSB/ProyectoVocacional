@@ -64,11 +64,9 @@ class ResetPasswordEmailSender(
                                             </tr>
                                         </table>
                                         <p style="margin:0 0 16px;font-size:13px;color:#777777;line-height:1.6;">
-                                            Este enlace es valido por una hora. Si no puedes usar el boton, copia y pega
-                                            la siguiente direccion en tu navegador:
-                                        </p>
-                                        <p style="margin:0 0 16px;font-size:12px;color:#555555;word-break:break-all;">
-                                            $enlaceSeguro
+                                            Este enlace es valido por una hora. Si no puedes usar el boton, haz clic
+                                            <a href="$enlaceSeguro" style="color:#0f2b5b;text-decoration:underline;">aqui</a>
+                                            para restablecer tu contrasena.
                                         </p>
                                     </td>
                                 </tr>

@@ -29,6 +29,10 @@ class ProgramaService (
         return programas
     }
 
+    fun obtenerTodosIncluyendoInactivos(): List<Programa> {
+        return repository.obtenerTodosIncluyendoInactivos()
+    }
+
 
     fun obtenerPorId(id: Long): Programa {
 

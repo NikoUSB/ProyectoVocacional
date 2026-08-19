@@ -5,6 +5,7 @@ import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.Passwor
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.mapper.seguridad.PasswordResetTokenMapper
 import com.usbbog.proyectovocacional.backend.infrastructure.persistence.repository.PasswordResetTokenJpaRepository
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
 class PasswordResetTokenRepositoryImpl(
@@ -20,6 +21,11 @@ class PasswordResetTokenRepositoryImpl(
     override fun obtenerPorToken(token: String): PasswordResetToken? {
         return jpaRepository.findByToken(token)
             ?.let(PasswordResetTokenMapper::toDomain)
+    }
+
+    @Transactional
+    override fun invalidarTokensAnteriores(idUsuario: Long) {
+        jpaRepository.invalidarTokensAnteriores(idUsuario)
     }
 
 }

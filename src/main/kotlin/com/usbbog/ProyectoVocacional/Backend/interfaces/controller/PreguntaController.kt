@@ -32,7 +32,7 @@ class PreguntaController(
 
     @GetMapping
     fun obtenerPreguntas() : List<PreguntaResponse> {
-        val preguntas = preguntaService.obtenerTodos()
+        val preguntas = preguntaService.obtenerTodosIncluyendoInactivos()
             .map(PreguntaDtoMapper :: toResponse)
 
         return preguntas

@@ -6,6 +6,8 @@ interface PreguntaRepository {
 
     fun obtenerTodos(): List<Pregunta>
 
+    fun obtenerTodosIncluyendoInactivos(): List<Pregunta>
+
     fun obtenerPorId(id: Long): Pregunta?
 
     fun obtenerPorCodigo(codigo: String): Pregunta?

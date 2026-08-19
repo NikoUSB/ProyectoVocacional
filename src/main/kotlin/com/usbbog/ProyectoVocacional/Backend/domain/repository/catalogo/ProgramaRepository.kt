@@ -7,6 +7,8 @@ interface ProgramaRepository {
 
     fun obtenerTodos(): List<Programa>
 
+    fun obtenerTodosIncluyendoInactivos(): List<Programa>
+
     fun obtenerPorId(id: Long): Programa?
 
     fun guardar(programa: Programa): Programa

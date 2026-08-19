@@ -6,5 +6,6 @@ data class AreaResponse (
     val perfilPredonimante: String?,
     val descripcionArea: String?,
     val pathLogo: String?,
-    val pachoPath: String?
+    val pachoPath: String?,
+    val activo: Boolean
 )

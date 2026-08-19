@@ -9,6 +9,8 @@ data class AppProperties(
 
     val frontendUrl: String,
 
-    val resetPasswordPath: String
+    val resetPasswordPath: String,
+
+    val uploadDir: String = "./uploads/pacho"
 
 )

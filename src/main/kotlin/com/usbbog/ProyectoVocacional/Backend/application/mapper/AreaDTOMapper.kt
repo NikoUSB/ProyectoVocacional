@@ -42,7 +42,8 @@ object AreaDtoMapper {
             perfilPredonimante = domain.perfilPredonimante,
             descripcionArea = domain.descripcionArea,
             pathLogo = domain.pathLogo,
-            pachoPath = domain.pachoPath
+            pachoPath = domain.pachoPath,
+            activo = domain.activo
         )
 
     }

@@ -23,7 +23,7 @@ class ProgramaController (
     @GetMapping
     fun obtenerTodos(): List<ProgramaResponse> {
 
-        return programaService.obtenerTodos()
+        return programaService.obtenerTodosIncluyendoInactivos()
             .map(ProgramaDtoMapper::toResponse)
 
     }

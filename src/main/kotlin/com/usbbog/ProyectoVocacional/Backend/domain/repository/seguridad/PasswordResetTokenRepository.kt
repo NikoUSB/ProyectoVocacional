@@ -8,4 +8,6 @@ interface PasswordResetTokenRepository {
 
     fun obtenerPorToken(token: String): PasswordResetToken?
 
+    fun invalidarTokensAnteriores(idUsuario: Long)
+
 }
