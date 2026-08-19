@@ -8,9 +8,11 @@ import com.usbbog.proyectovocacional.backend.domain.repository.seguridad.Usuario
 import com.usbbog.proyectovocacional.backend.infrastructure.config.AppProperties
 import com.usbbog.proyectovocacional.backend.infrastructure.mail.ResetPasswordEmailSender
 import com.usbbog.proyectovocacional.backend.infrastructure.security.password.PasswordService
+import com.usbbog.proyectovocacional.backend.infrastructure.security.password.TokenHashService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDateTime
 import java.util.UUID
@@ -28,12 +30,15 @@ class PasswordResetService(
 
     private val appProperties: AppProperties,
 
-    private val logsService: LogsService
+    private val logsService: LogsService,
+
+    private val tokenHashService: TokenHashService
 
 ) {
 
     private val log = LoggerFactory.getLogger(PasswordResetService::class.java)
 
+    @Transactional
     fun solicitarRecuperacion(correo: String): MensajeResponse {
 
         val usuario = usuarioRepository.obtenerPorCorreo(correo)
@@ -46,11 +51,15 @@ class PasswordResetService(
                     "No fue posible generar el token de recuperación."
                 )
 
+            tokenRepository.invalidarTokensAnteriores(idUsuario)
+
+            val rawToken = UUID.randomUUID().toString().replace("-", "")
+
             val tokenGuardado = tokenRepository.guardar(
                 PasswordResetToken(
                     id = null,
                     idUsuario = idUsuario,
-                    token = UUID.randomUUID().toString().replace("-", ""),
+                    token = tokenHashService.hash(rawToken),
                     fechaExpiracion = LocalDateTime.now().plusHours(1),
                     usado = false,
                     fechaCreacion = LocalDateTime.now()
@@ -61,7 +70,7 @@ class PasswordResetService(
                 append(appProperties.frontendUrl)
                 append(appProperties.resetPasswordPath)
                 append("?token=")
-                append(tokenGuardado.token)
+                append(rawToken)
             }
 
             val nombreCompleto = listOf(usuario.nombre, usuario.apellidos)
@@ -101,7 +110,9 @@ class PasswordResetService(
 
     fun restablecerContrasena(request: ResetPasswordRequest): MensajeResponse {
 
-        val token = tokenRepository.obtenerPorToken(request.token)
+        val tokenHash = tokenHashService.hash(request.token)
+
+        val token = tokenRepository.obtenerPorToken(tokenHash)
             ?: throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "El token de recuperación no es válido."
