@@ -41,6 +41,10 @@ El estado se basa en las clases, servicios y rutas presentes en el código fuent
 | Administración de roles y permisos | Implementado | Rutas de roles, actividades y asignación de actividades |
 | Dashboard administrativo | Implementado | `GET /api/v1/dashboard` |
 | Auditoría de operaciones | Implementado | Tabla `logs` y `GET /api/v1/admin/logs` |
+| Logging completo de endpoints | Implementado | `LogsService` registra login, registro, cambios de contraseña, CRUD admin, pruebas y más |
+| Token de recuperación hasheado (SHA-256) | Implementado | `TokenHashService` almacena hash; tokens previos se invalidan automáticamente |
+| Restablecimiento de contraseña por ROOT | Implementado | `POST /api/v1/usuarios/{id}/restablecer-contrasena` (usa número de documento) |
+| Carga de imagen pacho por área | Implementado | `POST /api/v1/areas/{id}/imagen-pacho` con almacenamiento en disco |
 
 Los elementos que en el README anterior aparecían como “por ajustar” o “faltantes” ya cuentan con implementación en el código actual.
 
@@ -222,6 +226,7 @@ Formato de intercambio: JSON
 | `DELETE` | `/api/v1/usuarios/{id}` | Protegido | Desactiva un usuario. |
 | `PATCH` | `/api/v1/usuarios/{id}/reactivar` | Protegido | Reactiva un usuario. |
 | `PATCH` | `/api/v1/usuarios/{id}/rol` | `ROOT` | Cambia el rol de un usuario activo. |
+| `POST` | `/api/v1/usuarios/{id}/restablecer-contrasena` | `ROOT` | Restablece la contraseña de un usuario al número de documento. |
 | `GET` | `/api/v1/usuarios/{id}/pruebas` | `ROOT` o `ADMINISTRADOR` | Consulta las pruebas de otro usuario. |
 
 ### Ubicaciones y catálogos públicos
@@ -242,6 +247,7 @@ Formato de intercambio: JSON
 | `PUT` | `/api/v1/areas/{id}` | Protegido | Actualiza un área activa. |
 | `DELETE` | `/api/v1/areas/{id}` | Protegido | Desactiva un área. |
 | `PATCH` | `/api/v1/areas/{id}/reactivar` | Protegido | Reactiva un área. |
+| `POST` | `/api/v1/areas/{id}/imagen-pacho` | Protegido | Sube la imagen pacho de un área (multipart/form-data). |
 | `GET` | `/api/v1/areas/{id}/programas` | Protegido | Lista programas de un área. |
 | `GET` | `/api/v1/programas` | Protegido | Lista programas activos. |
 | `GET` | `/api/v1/programas/{id}` | Protegido | Consulta un programa. |
@@ -301,6 +307,13 @@ Ejemplo abreviado para presentar la prueba:
 | `GET` | `/api/v1/dashboard` | Protegido | Devuelve métricas, distribución geográfica y resultados recientes. |
 | `GET` | `/api/v1/admin/logs` | `ROOT` | Consulta el registro de auditoría. |
 
+### Logs y auditoría
+
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| `GET` | `/api/v1/logs` | `ROOT` | Lista registros de auditoría con filtros por usuario, acción y fecha. |
+| `GET` | `/api/v1/logs/usuario/{id}` | `ROOT` | Lista los registros de auditoría de un usuario específico. |
+
 “Protegido” implica JWT válido y una actividad compatible en la matriz dinámica de permisos.
 
 ## Reglas de negocio
@@ -319,8 +332,11 @@ Ejemplo abreviado para presentar la prueba:
 
 - La respuesta de `forgot-password` es genérica para no revelar si un correo está registrado.
 - Cada token se genera de forma aleatoria, vence una hora después de su creación y solo puede utilizarse una vez.
+- Los tokens se almacenan como hash SHA-256 en la tabla `password_reset_token`; el token raw nunca se persiste.
+- Al solicitar un nuevo token, los tokens anteriores no utilizados del mismo usuario se invalidan automáticamente.
 - El enlace se construye con `app.frontend-url` y `app.reset-password-path`.
 - Tras un restablecimiento exitoso, la nueva contraseña se cifra y el token queda marcado como usado.
+- **ROOT** puede restablecer la contraseña de cualquier usuario mediante `POST /usuarios/{id}/restablecer-contrasena`; el nuevo valor es el número de documento del usuario.
 
 ### Presentación y cálculo de la prueba
 
@@ -340,7 +356,9 @@ Ejemplo abreviado para presentar la prueba:
 ### Desactivación lógica y auditoría
 
 - Usuarios, roles, áreas, programas y preguntas se desactivan mediante su campo `estado` y pueden reactivarse por las rutas correspondientes.
+- Las áreas, programas y preguntas también soportan inclusión/exclusión con el campo `activo` para control granular.
 - Las operaciones relevantes generan registros de auditoría con el usuario ejecutor, el recurso afectado, una descripción y el resultado.
+- El logging registra login, registro, cambio de contraseña, restablecimiento, CRUD administrativo, pruebas, roles, permisos y carga de imágenes.
 
 ## Configuración local
 
@@ -440,3 +458,5 @@ Estados habituales: `400` para validaciones, `401` para falta de autenticación,
 - El registro depende temporalmente del rol con identificador `3`; conviene reemplazar esta dependencia por una búsqueda por nombre o una propiedad configurable.
 - No hay scripts de migración versionados en el repositorio. Debido a `ddl-auto=validate`, el despliegue debe aprovisionar el esquema MySQL por otro medio.
 - La matriz de `actividad` y `rol_actividad` debe estar cargada y alineada con los métodos y patrones de URL; de lo contrario, una ruta autenticada responderá `403`.
+- El logging registra operaciones en 29+ puntos del sistema: login, registro, perfil, contraseles, CRUD administrativo, pruebas, roles y pacho.
+- Las imágenes pacho se almacenan en disco bajo `src/main/resources/static/images/pacho/` y se sirven estáticamente.
